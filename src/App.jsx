@@ -167,13 +167,15 @@ export default function App() {
   onClose={() => setAuthOpen(false)}
   onToast={showToast}
 />
-<nav className="fixed top-3 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl animate-blur-in">
-    <div className="glass-strong rounded-full px-4 sm:px-6 py-3 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2">
+<nav className="fixed top-3 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px] sm:w-[95%] sm:max-w-6xl animate-blur-in">
+    <div className="glass-strong rounded-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3 min-w-0">
+        <a href="#" className="flex items-center gap-2 min-w-0">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
-            <span className="font-oswald font-500 text-lg sm:text-xl tracking-tight">Scolis<span className="text-amber-400">.ai</span></span>
+            <span className="font-oswald font-500 text-lg sm:text-xl tracking-tight truncate max-w-[60vw] sm:max-w-none">
+              Scolis<span className="text-amber-400">.ai</span>
+            </span>
         </a>
         <div className="hidden md:flex items-center gap-8">
             <a href="#solusi" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Solusi</a>
@@ -251,7 +253,7 @@ export default function App() {
         </div>
     </div>
     <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <div className="animate-fade-in-up inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
+        <div className="animate-fade-in-up inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 md:mt-8 lg:mt-10">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             <span className="text-[11px] font-semibold tracking-widest uppercase text-gray-300">Platform AI Terdepan di Indonesia</span>
         </div>
