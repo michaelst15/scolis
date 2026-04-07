@@ -167,10 +167,9 @@ export default function App() {
   onClose={() => setAuthOpen(false)}
   onToast={showToast}
 />
-<nav className="fixed top-3 sm:top-4 inset-x-0 z-50 flex justify-center animate-blur-in">
-    <div className="w-[92%] max-w-[420px] sm:w-[95%] sm:max-w-6xl glass-strong rounded-full px-4 sm:px-6 py-3 grid grid-cols-3 items-center md:flex md:items-center md:justify-between gap-3 min-w-0">
-        <div className="hidden md:block"></div>
-        <a href="#" className="flex items-center gap-2 min-w-0 col-start-2 justify-self-center md:col-start-auto md:justify-self-auto">
+<nav className="fixed top-3 sm:top-4 inset-x-0 z-50 animate-blur-in px-4 sm:px-6">
+    <div className="mx-auto w-[92%] max-w-[520px] md:w-full md:max-w-6xl glass-strong rounded-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3 min-w-0">
+        <a href="#" className="flex items-center gap-2 min-w-0 justify-self-start">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
@@ -178,14 +177,14 @@ export default function App() {
               Scolis<span className="text-amber-400">.ai</span>
             </span>
         </a>
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8 justify-self-center">
             <a href="#solusi" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Solusi</a>
             <a href="#fitur" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Fitur</a>
             <a href="#proses" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Cara Kerja</a>
             <a href="#statistik" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Keunggulan</a>
             <a href="#kontak" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Kontak</a>
         </div>
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3 justify-self-end">
             <button
               type="button"
               className="text-[13px] font-medium text-gray-300 hover:text-white px-4 py-2 transition-colors"
@@ -254,7 +253,7 @@ export default function App() {
         </div>
     </div>
     <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <div className="animate-fade-in-up inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 md:mt-8 lg:mt-10">
+        <div className="animate-fade-in-up inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 mt-10 md:mt-8 lg:mt-10">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             <span className="text-[11px] font-semibold tracking-widest uppercase text-gray-300">Platform AI Terdepan di Indonesia</span>
         </div>
