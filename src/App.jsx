@@ -167,13 +167,13 @@ export default function App() {
   onClose={() => setAuthOpen(false)}
   onToast={showToast}
 />
-<nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl animate-blur-in">
-    <div className="glass-strong rounded-full px-6 py-3 flex items-center justify-between">
+<nav className="fixed top-3 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl animate-blur-in">
+    <div className="glass-strong rounded-full px-4 sm:px-6 py-3 flex items-center justify-between">
         <a href="#" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
-            <span className="font-oswald font-500 text-xl tracking-tight">Scolis<span className="text-amber-400">.ai</span></span>
+            <span className="font-oswald font-500 text-lg sm:text-xl tracking-tight">Scolis<span className="text-amber-400">.ai</span></span>
         </a>
         <div className="hidden md:flex items-center gap-8">
             <a href="#solusi" className="text-[13px] font-medium tracking-wide text-gray-300 hover:text-white transition-colors">Solusi</a>
@@ -197,31 +197,31 @@ export default function App() {
                 Mulai Gratis
             </button>
         </div>
-        <button className="md:hidden text-white" onClick={toggleMobile}>
+        <button type="button" className="md:hidden text-white" onClick={toggleMobile} aria-label="Buka menu">
             <i data-lucide="menu" className="w-6 h-6"></i>
         </button>
     </div>
 </nav>
-<div className="mobile-menu fixed inset-0 z-[60] bg-[#0a0f26]/98 backdrop-blur-xl flex flex-col" id="mobileMenu">
-    <div className="flex items-center justify-between px-6 py-5">
+<div className="mobile-menu fixed inset-0 z-[60] bg-[#0a0f26]/98 backdrop-blur-xl flex flex-col overflow-y-auto overscroll-contain" id="mobileMenu">
+    <div className="flex items-center justify-between px-5 sm:px-6 py-5">
         <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
-            <span className="font-oswald font-500 text-xl">Scolis<span className="text-amber-400">.ai</span></span>
+            <span className="font-oswald font-500 text-lg sm:text-xl">Scolis<span className="text-amber-400">.ai</span></span>
         </div>
-        <button onClick={toggleMobile} className="text-white"><i data-lucide="x" className="w-6 h-6"></i></button>
+        <button type="button" onClick={toggleMobile} className="text-white" aria-label="Tutup menu"><i data-lucide="x" className="w-6 h-6"></i></button>
     </div>
-    <div className="flex flex-col items-center justify-center flex-1 gap-8">
-        <a href="#solusi" onClick={toggleMobile} className="text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Solusi</a>
-        <a href="#fitur" onClick={toggleMobile} className="text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Fitur</a>
-        <a href="#proses" onClick={toggleMobile} className="text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Cara Kerja</a>
-        <a href="#statistik" onClick={toggleMobile} className="text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Keunggulan</a>
-        <a href="#kontak" onClick={toggleMobile} className="text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Kontak</a>
-        <div className="flex flex-col items-center gap-3 mt-4">
+    <div className="flex flex-col items-center flex-1 justify-start gap-6 px-6 pt-6 pb-10 w-full max-w-sm mx-auto">
+        <a href="#solusi" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Solusi</a>
+        <a href="#fitur" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Fitur</a>
+        <a href="#proses" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Cara Kerja</a>
+        <a href="#statistik" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Keunggulan</a>
+        <a href="#kontak" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Kontak</a>
+        <div className="flex flex-col items-center gap-3 mt-2 w-full">
             <button
               type="button"
-              className="text-gray-300 hover:text-white px-8 py-3 rounded-full text-lg transition-colors"
+              className="w-full text-gray-300 hover:text-white px-8 py-3 rounded-full text-lg transition-colors"
               onClick={() => {
                 toggleMobile()
                 setAuthMode('login')
@@ -230,7 +230,7 @@ export default function App() {
             >
               Masuk
             </button>
-            <button className="bg-amber-500 text-black font-semibold px-8 py-3 rounded-full text-lg">Mulai Gratis</button>
+            <button className="w-full bg-amber-500 text-black font-semibold px-8 py-3 rounded-full text-lg">Mulai Gratis</button>
         </div>
     </div>
 </div>
