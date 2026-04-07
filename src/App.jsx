@@ -168,8 +168,9 @@ export default function App() {
   onToast={showToast}
 />
 <nav className="fixed top-3 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px] sm:w-[95%] sm:max-w-6xl animate-blur-in">
-    <div className="glass-strong rounded-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3 min-w-0">
-        <a href="#" className="flex items-center gap-2 min-w-0">
+    <div className="glass-strong rounded-full px-4 sm:px-6 py-3 grid grid-cols-3 items-center md:flex md:items-center md:justify-between gap-3 min-w-0">
+        <div className="hidden md:block"></div>
+        <a href="#" className="flex items-center gap-2 min-w-0 col-start-2 justify-self-center md:col-start-auto md:justify-self-auto">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
@@ -199,7 +200,7 @@ export default function App() {
                 Mulai Gratis
             </button>
         </div>
-        <button type="button" className="md:hidden text-white" onClick={toggleMobile} aria-label="Buka menu">
+        <button type="button" className="md:hidden text-white justify-self-end" onClick={toggleMobile} aria-label="Buka menu">
             <i data-lucide="menu" className="w-6 h-6"></i>
         </button>
     </div>
