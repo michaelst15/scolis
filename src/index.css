@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+::-webkit-scrollbar{display:none}
+html{scrollbar-width:none;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hidden}
+.font-oswald{font-family:'Oswald',sans-serif}
+
+@keyframes fadeInUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes blurIn{0%{opacity:0;filter:blur(15px);transform:scale(0.95)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-20px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.3)}50%{box-shadow:0 0 40px rgba(245,158,11,0.6)}}
+@keyframes scan-line{0%{top:0%;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes typing{0%{width:0}100%{width:100%}}
+@keyframes blink{0%,100%{border-color:transparent}50%{border-color:#F59E0B}}
+@keyframes grid-move{0%{background-position:0 0}100%{background-position:60px 60px}}
+@keyframes orbit{0%{transform:rotate(0deg) translateX(120px) rotate(0deg)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)}}
+@keyframes orbit2{0%{transform:rotate(120deg) translateX(90px) rotate(-120deg)}100%{transform:rotate(480deg) translateX(90px) rotate(-480deg)}}
+@keyframes orbit3{0%{transform:rotate(240deg) translateX(150px) rotate(-240deg)}100%{transform:rotate(600deg) translateX(150px) rotate(-600deg)}}
+@keyframes data-flow{0%{stroke-dashoffset:100}100%{stroke-dashoffset:0}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.animate-fade-in-up{animation:fadeInUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) both}
+.animate-blur-in{animation:blurIn 1s cubic-bezier(0.25,0.46,0.45,0.94) both}
+.animate-float{animation:float 6s ease-in-out infinite}
+.animate-pulse-glow{animation:pulse-glow 3s ease-in-out infinite}
+.anim{animation:fadeUp .9s ease both}
+
+.delay-100{animation-delay:0.1s}
+.delay-200{animation-delay:0.2s}
+.delay-300{animation-delay:0.3s}
+.delay-400{animation-delay:0.4s}
+.delay-500{animation-delay:0.5s}
+.delay-600{animation-delay:0.6s}
+.delay-700{animation-delay:0.7s}
+.delay-800{animation-delay:0.8s}
+
+.gradient-text{
+  background:linear-gradient(to right,#F59E0B,#FBBF24,#FDE68A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.gradient-text-blue{
+  background:linear-gradient(to right,#60A5FA,#3B82F6,#818CF8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.gradient-text-green{
+  background:linear-gradient(to right,#34D399,#10B981,#6EE7B7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.gradient-text-purple{
+  background:linear-gradient(to right,#A78BFA,#8B5CF6,#C4B5FD);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1)}
+.glass-strong{background:rgba(255,255,255,0.08);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.12)}
+
+.card-hover{transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
+.card-hover:hover{transform:translateY(-8px);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}
+
+.grid-bg{
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:grid-move 20s linear infinite;
+}
+
+.noise-overlay::before{
+  content:'';position:absolute;inset:0;
+  background:url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity:0.15;pointer-events:none;
+}
+
+.solution-card{position:relative;overflow:hidden}
+.solution-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--card-color),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.solution-card:hover::before{opacity:1}
+.solution-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at top,var(--card-glow),transparent 70%);
+  opacity:0;transition:opacity 0.4s;
+}
+.solution-card:hover::after{opacity:1}
+
+.stat-number{
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+.shimmer{
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.05) 50%,transparent 100%);
+  background-size:200% 100%;animation:shimmer 3s infinite;
+}
+
+.scroll-reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.scroll-reveal.visible{opacity:1;transform:translateY(0)}
+
+.tab-active{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.5);color:#F59E0B}
+
+.toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:9999;
+  transform:translateY(120%);opacity:0;
+  transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+.mobile-menu{
+  transform:translateX(100%);transition:transform 0.3s ease;
+}
+.mobile-menu.open{transform:translateX(0)}
+
+.progress-bar{position:fixed;top:0;left:0;height:3px;z-index:9999;
+  background:linear-gradient(to right,#F59E0B,#FBBF24);transition:width 0.1s}
