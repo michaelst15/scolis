@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 ::-webkit-scrollbar{display:none}
-html{scrollbar-width:none;scroll-behavior:smooth}
+html{scrollbar-width:none;scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hidden}
+#root{overflow-x:hidden}
 .font-oswald{font-family:'Oswald',sans-serif}
 
 @keyframes fadeInUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
