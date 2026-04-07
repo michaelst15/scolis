@@ -202,7 +202,7 @@ export default function App() {
         <button type="button" className="md:hidden text-white justify-self-end" onClick={toggleMobile} aria-label="Buka menu">
             <i data-lucide="menu" className="w-6 h-6"></i>
         </button>
-    </div>
+</div>
 </nav>
 <div className="mobile-menu fixed inset-0 z-[60] bg-[#0a0f26]/98 backdrop-blur-xl flex flex-col overflow-y-auto overscroll-contain" id="mobileMenu">
     <div className="flex items-center justify-between px-5 sm:px-6 py-5">

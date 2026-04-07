@@ -858,7 +858,7 @@ export default function AnimasiSection() {
           </h2>
         </div>
 
-        <canvas ref={canvasRef} width={1100} height={680} className="max-w-full h-auto" style={{ cursor: 'default' }} />
+        <canvas ref={canvasRef} width={1100} height={680} className="block w-full max-w-full h-auto" style={{ cursor: 'default' }} />
 
         <div className="flex flex-wrap justify-center gap-5 text-[11px] text-gray-500">
           <span className="flex items-center gap-1.5">
@@ -884,4 +884,3 @@ export default function AnimasiSection() {
     </section>
   )
 }
-
