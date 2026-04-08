@@ -104,17 +104,40 @@ function makeId() {
   return String(Date.now()) + '-' + Math.random().toString(16).slice(2)
 }
 
+function getGreetingByHour(d = new Date()) {
+  const h = d.getHours()
+  if (h >= 4 && h < 11) return 'Selamat pagi'
+  if (h >= 11 && h < 15) return 'Selamat siang'
+  if (h >= 15 && h < 19) return 'Selamat sore'
+  return 'Selamat malam'
+}
+
+function getDateLabel(d = new Date()) {
+  return d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 export default function Dashboard({ onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('overview')
   const [chartType, setChartType] = useState('all')
   const [animateBars, setAnimateBars] = useState(false)
   const [feedItems, setFeedItems] = useState([])
+  const [mobileUserTipOpen, setMobileUserTipOpen] = useState(false)
+  const [greeting, setGreeting] = useState(() => getGreetingByHour())
+  const [dateLabel, setDateLabel] = useState(() => getDateLabel())
 
   const mainChartRef = useRef(null)
   const donutRef = useRef(null)
 
-  const weekdayLabel = useMemo(() => 'Senin, 20 Januari 2025', [])
+  useEffect(() => {
+    const tick = () => {
+      setGreeting(getGreetingByHour())
+      setDateLabel(getDateLabel())
+    }
+    tick()
+    const t = window.setInterval(tick, 60_000)
+    return () => window.clearInterval(t)
+  }, [])
 
   useEffect(() => {
     if (!sidebarOpen) return
@@ -133,6 +156,12 @@ export default function Dashboard({ onLogout }) {
   useEffect(() => {
     window.lucide?.createIcons?.()
   }, [sidebarOpen, activeNav, chartType, animateBars])
+
+  useEffect(() => {
+    if (!mobileUserTipOpen) return
+    const t = window.setTimeout(() => setMobileUserTipOpen(false), 2500)
+    return () => window.clearTimeout(t)
+  }, [mobileUserTipOpen])
 
   useEffect(() => {
     const firstBurst = Array.from({ length: 8 }).map(() => {
@@ -455,7 +484,7 @@ export default function Dashboard({ onLogout }) {
         </aside>
 
         <div className="flex-1 flex flex-col h-full overflow-hidden">
-          <header className="glass-strong flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 anim-up">
+          <header className="glass-strong relative z-20 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 anim-up">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -485,7 +514,22 @@ export default function Dashboard({ onLogout }) {
                 <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500"></span>
               </button>
               <div className="w-px h-5 bg-white/10 hidden sm:block"></div>
-              <button type="button" className="flex items-center gap-2.5 cursor-pointer" onClick={onLogout}>
+              <div className="sm:hidden relative">
+                <button
+                  type="button"
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold"
+                  onClick={() => setMobileUserTipOpen((v) => !v)}
+                  aria-label="Info pengguna"
+                >
+                  RA
+                </button>
+                {mobileUserTipOpen ? (
+                  <div className="absolute z-[200] top-full right-0 mt-2 px-3 py-2 rounded-xl glass-strong text-white text-[11px] whitespace-nowrap shadow-[0_10px_35px_rgba(0,0,0,0.45)] pointer-events-none">
+                    Rizki Aditya
+                  </div>
+                ) : null}
+              </div>
+              <div className="hidden sm:flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold">
                   RA
                 </div>
@@ -493,7 +537,14 @@ export default function Dashboard({ onLogout }) {
                   <p className="text-xs font-medium">Rizki Aditya</p>
                   <p className="text-[10px] text-gray-500">Admin</p>
                 </div>
-                <i data-lucide="log-out" className="w-4 h-4 text-gray-500"></i>
+              </div>
+              <button
+                type="button"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                onClick={onLogout}
+                aria-label="Keluar"
+              >
+                <i data-lucide="log-out" className="w-4 h-4 text-gray-400"></i>
               </button>
             </div>
           </header>
@@ -511,10 +562,8 @@ export default function Dashboard({ onLogout }) {
               <>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
               <div>
-                <h1 className="font-oswald font-light text-2xl tracking-tight">Selamat pagi, Rizki</h1>
-                <p className="text-gray-500 text-xs mt-0.5">
-                  {weekdayLabel} — Berikut ringkasan operasional Anda hari ini.
-                </p>
+                <h1 className="font-oswald font-light text-2xl tracking-tight">{greeting}, Rizki</h1>
+                <p className="text-gray-500 text-xs mt-0.5">{dateLabel} — Berikut ringkasan operasional Anda hari ini.</p>
               </div>
             </div>
 

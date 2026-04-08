@@ -14,7 +14,12 @@ export default function App() {
   const toastTimeoutRef = useRef(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
-  const [isAdminAuthed, setIsAdminAuthed] = useState(false)
+  const [isAdminAuthed, setIsAdminAuthed] = useState(() => window.localStorage.getItem('adminAuthed') === '1')
+
+  useEffect(() => {
+    if (isAdminAuthed) window.localStorage.setItem('adminAuthed', '1')
+    else window.localStorage.removeItem('adminAuthed')
+  }, [isAdminAuthed])
 
   const initIcons = () => {
     if (window.lucide?.createIcons) window.lucide.createIcons()
@@ -154,9 +159,7 @@ export default function App() {
     }
   }, [])
 
-  if (isAdminAuthed) {
-    return <Dashboard onLogout={() => setIsAdminAuthed(false)} />
-  }
+  if (isAdminAuthed) return <Dashboard onLogout={() => setIsAdminAuthed(false)} />
 
   return (
     <>
