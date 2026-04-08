@@ -511,9 +511,7 @@ export default function Dashboard({ onLogout }) {
               <>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
               <div>
-                <h1 className="font-oswald font-light text-2xl tracking-tight">
-                  Selamat pagi, Rizki <span className="inline-block animate-bounce">👋</span>
-                </h1>
+                <h1 className="font-oswald font-light text-2xl tracking-tight">Selamat pagi, Rizki</h1>
                 <p className="text-gray-500 text-xs mt-0.5">
                   {weekdayLabel} — Berikut ringkasan operasional Anda hari ini.
                 </p>
