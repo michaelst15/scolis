@@ -363,7 +363,10 @@ export default function Dashboard({ onLogout }) {
               <button
                 key={it.id}
                 type="button"
-                onClick={() => setActiveNav(it.id)}
+                onClick={() => {
+                  setActiveNav(it.id)
+                  setSidebarOpen(false)
+                }}
                 className={
                   'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ' +
                   (activeNav === it.id ? 'bg-amber-500/10 border-r-2 border-amber-500' : 'hover:bg-white/5')
@@ -385,22 +388,50 @@ export default function Dashboard({ onLogout }) {
             ))}
 
             <p className="text-[9px] font-semibold tracking-[.2em] uppercase text-gray-600 px-3 mb-2 mt-6">Analytics</p>
-            <button type="button" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNav('reports')
+                setSidebarOpen(false)
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <i data-lucide="bar-chart-3" className="w-[18px] h-[18px] text-gray-400"></i>
               <span className="text-[13px] text-gray-300 font-medium">Laporan</span>
             </button>
-            <button type="button" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNav('activity')
+                setSidebarOpen(false)
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <i data-lucide="activity" className="w-[18px] h-[18px] text-gray-400"></i>
               <span className="text-[13px] text-gray-300 font-medium">Aktivitas Log</span>
             </button>
 
             <p className="text-[9px] font-semibold tracking-[.2em] uppercase text-gray-600 px-3 mb-2 mt-6">System</p>
-            <button type="button" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNav('integrations')
+                setSidebarOpen(false)
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <i data-lucide="plug" className="w-[18px] h-[18px] text-gray-400"></i>
               <span className="text-[13px] text-gray-300 font-medium">Integrasi</span>
               <span className="ml-auto w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
             </button>
-            <button type="button" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNav('settings')
+                setSidebarOpen(false)
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <i data-lucide="settings" className="w-[18px] h-[18px] text-gray-400"></i>
               <span className="text-[13px] text-gray-300 font-medium">Pengaturan</span>
             </button>
@@ -487,12 +518,6 @@ export default function Dashboard({ onLogout }) {
                   {weekdayLabel} — Berikut ringkasan operasional Anda hari ini.
                 </p>
               </div>
-              <button
-                type="button"
-                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs px-4 py-2.5 rounded-xl transition-all hover:shadow-[0_0_25px_rgba(245,158,11,0.3)] hover:scale-[1.02] flex-shrink-0 self-start sm:self-auto"
-              >
-                <i data-lucide="plus" className="w-4 h-4"></i> Buat Workflow Baru
-              </button>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
