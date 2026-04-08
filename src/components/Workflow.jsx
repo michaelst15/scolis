@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import DokumenTemplate from './DokumenTemplate.jsx'
+import MarketingTemplate from './MarketingTemplate.jsx'
 
 const TYPE_COLORS = { doc: '#F59E0B', mkt: '#3B82F6', sup: '#10B981' }
 const TYPE_LABELS = { doc: 'Dokumen', mkt: 'Marketing', sup: 'Support' }
@@ -1099,24 +1101,30 @@ export default function Workflow() {
 
               <div>
                 <label className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 mb-2 block">Template Node</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { label: 'Input', icon: 'file-input', c: '#F59E0B' },
-                    { label: 'AI Process', icon: 'brain', c: '#A855F7' },
-                    { label: 'Condition', icon: 'git-branch', c: '#3B82F6' },
-                    { label: 'DB Lookup', icon: 'database', c: '#10B981' },
-                    { label: 'Output', icon: 'send', c: '#06b6d4' },
-                    { label: 'Email', icon: 'mail', c: '#EF4444' },
-                  ].map((n) => (
-                    <span
-                      key={n.label}
-                      className="text-[10px] font-medium px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer flex items-center gap-1.5 hover:bg-white/10 transition-colors"
-                    >
-                      <i data-lucide={n.icon} className="w-3 h-3" style={{ color: n.c }}></i>
-                      {n.label}
-                    </span>
-                  ))}
-                </div>
+                {newCat === 'doc' ? (
+                  <DokumenTemplate />
+                ) : newCat === 'mkt' ? (
+                  <MarketingTemplate />
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Input', icon: 'file-input', c: '#F59E0B' },
+                      { label: 'AI Process', icon: 'brain', c: '#A855F7' },
+                      { label: 'Condition', icon: 'git-branch', c: '#3B82F6' },
+                      { label: 'DB Lookup', icon: 'database', c: '#10B981' },
+                      { label: 'Output', icon: 'send', c: '#06b6d4' },
+                      { label: 'Email', icon: 'mail', c: '#EF4444' },
+                    ].map((n) => (
+                      <span
+                        key={n.label}
+                        className="text-[10px] font-medium px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer flex items-center gap-1.5 hover:bg-white/10 transition-colors"
+                      >
+                        <i data-lucide={n.icon} className="w-3 h-3" style={{ color: n.c }}></i>
+                        {n.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3 pt-2">
