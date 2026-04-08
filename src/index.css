@@ -5,6 +5,7 @@ html{scrollbar-width:none;scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hidden}
 #root{overflow-x:hidden}
 .font-oswald{font-family:'Oswald',sans-serif}
+.font-jetbrains{font-family:'JetBrains Mono',monospace}
 
 @keyframes fadeInUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes blurIn{0%{opacity:0;filter:blur(15px);transform:scale(0.95)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
@@ -20,12 +21,17 @@ body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hid
 @keyframes orbit3{0%{transform:rotate(240deg) translateX(150px) rotate(-240deg)}100%{transform:rotate(600deg) translateX(150px) rotate(-600deg)}}
 @keyframes data-flow{0%{stroke-dashoffset:100}100%{stroke-dashoffset:0}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes dashFadeUp{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes flowLine{0%{background-position:0 0}100%{background-position:200% 0}}
+@keyframes nodeGlow{0%,100%{box-shadow:0 0 8px rgba(245,158,11,0.2)}50%{box-shadow:0 0 20px rgba(245,158,11,0.4)}}
 
 .animate-fade-in-up{animation:fadeInUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) both}
 .animate-blur-in{animation:blurIn 1s cubic-bezier(0.25,0.46,0.45,0.94) both}
 .animate-float{animation:float 6s ease-in-out infinite}
 .animate-pulse-glow{animation:pulse-glow 3s ease-in-out infinite}
 .anim{animation:fadeUp .9s ease both}
+.anim-up{animation:dashFadeUp .7s ease both}
+.node-glow{animation:nodeGlow 2.8s ease-in-out infinite}
 
 .delay-100{animation-delay:0.1s}
 .delay-200{animation-delay:0.2s}
@@ -55,6 +61,8 @@ body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hid
 
 .glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1)}
 .glass-strong{background:rgba(255,255,255,0.08);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.12)}
+.glass-sidebar{background:rgba(255,255,255,0.03);backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,0.06)}
+.stat-num{letter-spacing:-0.03em}
 
 .card-hover{transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
 .card-hover:hover{transform:translateY(-8px);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}

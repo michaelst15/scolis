@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import AnimasiSection from './components/AnimasiSection.jsx'
 import AuthModal from './components/AuthModal.jsx'
+import Dashboard from './components/Dashboard.jsx'
 
 const FOOTER_IMAGES = Object.entries(
   import.meta.glob('./image/*.{png,jpg,jpeg,svg,webp,gif}', { eager: true, import: 'default' }),
@@ -13,6 +14,7 @@ export default function App() {
   const toastTimeoutRef = useRef(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
+  const [isAdminAuthed, setIsAdminAuthed] = useState(false)
 
   const initIcons = () => {
     if (window.lucide?.createIcons) window.lucide.createIcons()
@@ -152,6 +154,10 @@ export default function App() {
     }
   }, [])
 
+  if (isAdminAuthed) {
+    return <Dashboard onLogout={() => setIsAdminAuthed(false)} />
+  }
+
   return (
     <>
 
@@ -166,6 +172,7 @@ export default function App() {
   onModeChange={setAuthMode}
   onClose={() => setAuthOpen(false)}
   onToast={showToast}
+  onLoginSuccess={() => setIsAdminAuthed(true)}
 />
 <nav className="fixed top-3 sm:top-4 inset-x-0 z-50 animate-blur-in px-4 sm:px-6">
     <div className="mx-auto w-[92%] max-w-[520px] md:w-full md:max-w-6xl glass-strong rounded-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3 min-w-0">
@@ -214,7 +221,7 @@ export default function App() {
         </div>
         <button type="button" onClick={toggleMobile} className="text-white" aria-label="Tutup menu"><i data-lucide="x" className="w-6 h-6"></i></button>
     </div>
-    <div className="flex flex-col items-center flex-1 justify-start gap-6 px-6 pt-6 pb-10 w-full max-w-sm mx-auto">
+    <div className="flex flex-col items-center flex-1 justify-start gap-6 px-5 sm:px-6 pt-6 pb-10 w-full max-w-sm mx-auto">
         <a href="#solusi" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Solusi</a>
         <a href="#fitur" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Fitur</a>
         <a href="#proses" onClick={toggleMobile} className="text-xl sm:text-2xl font-oswald font-light tracking-wide text-gray-300 hover:text-amber-400 transition-colors">Cara Kerja</a>
@@ -252,7 +259,7 @@ export default function App() {
             <div className="w-1 h-1 rounded-full bg-purple-400/50"></div>
         </div>
     </div>
-    <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+    <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <div className="animate-fade-in-up inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 mt-10 md:mt-8 lg:mt-10">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             <span className="text-[11px] font-semibold tracking-widest uppercase text-gray-300">Platform AI Terdepan di Indonesia</span>
@@ -288,7 +295,7 @@ export default function App() {
     </div>
 </section>
 <section id="solusi" className="relative py-24 md:py-32">
-    <div className="max-w-7xl mx-auto px-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Solusi Kami</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -403,7 +410,7 @@ export default function App() {
 </section>
 <section id="fitur" className="relative py-24 md:py-32">
     <div className="absolute inset-0 grid-bg opacity-50"></div>
-    <div className="relative z-10 max-w-6xl mx-auto px-6">
+    <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Fitur Detail</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -722,7 +729,7 @@ export default function App() {
 <section id="proses" className="relative py-24 md:py-32 overflow-hidden">
     <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[150px]"></div>
     <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[120px]"></div>
-    <div className="relative z-10 max-w-6xl mx-auto px-6">
+    <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Cara Kerja</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -770,7 +777,7 @@ export default function App() {
 </section>
 <section id="statistik" className="relative py-24 md:py-32">
     <div className="absolute inset-0 grid-bg opacity-30"></div>
-    <div className="relative z-10 max-w-6xl mx-auto px-6">
+    <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Keunggulan</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -845,7 +852,7 @@ export default function App() {
 </section>
 <section className="relative py-24 md:py-32">
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[150px]"></div>
-    <div className="relative z-10 max-w-6xl mx-auto px-6">
+    <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Testimoni</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -915,7 +922,7 @@ export default function App() {
 </section>
 <section className="relative py-24 md:py-32">
     <div className="absolute inset-0 grid-bg opacity-30"></div>
-    <div className="relative z-10 max-w-5xl mx-auto px-6">
+    <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 scroll-reveal">
             <span className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-4 block">Harga</span>
             <h2 className="font-oswald font-light text-4xl md:text-5xl tracking-tight mb-4">
@@ -985,7 +992,7 @@ export default function App() {
     <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/15 rounded-full blur-[200px]"></div>
     </div>
-    <div className="relative z-10 max-w-4xl mx-auto px-6">
+    <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="glass-strong rounded-3xl p-8 md:p-12 text-center scroll-reveal">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-6 animate-pulse-glow">
                 <i data-lucide="zap" className="w-8 h-8 text-amber-400"></i>
@@ -1021,7 +1028,7 @@ export default function App() {
     </div>
 </section>
 <footer className="relative border-t border-white/5 pt-16 pb-8">
-    <div className="max-w-7xl mx-auto px-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
                 <div className="flex items-center gap-2 mb-4">

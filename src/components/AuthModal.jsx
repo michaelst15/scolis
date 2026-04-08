@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 
-export default function AuthModal({ open, mode, onModeChange, onClose, onToast }) {
+export default function AuthModal({ open, mode, onModeChange, onClose, onToast, onLoginSuccess }) {
   const [login, setLogin] = useState({ email: '', password: '' })
   const [register, setRegister] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [error, setError] = useState('')
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false)
 
   const title = useMemo(() => (mode === 'register' ? 'Daftar' : 'Masuk'), [mode])
 
   useEffect(() => {
     if (!open) return
     setError('')
+    setShowLoginPassword(false)
+    setShowRegisterPassword(false)
+    setShowRegisterConfirmPassword(false)
     window.lucide?.createIcons?.()
   }, [open, mode])
 
@@ -18,16 +24,10 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') onClose?.()
-    }
-    window.addEventListener('keydown', onKeyDown)
-
     return () => {
       document.body.style.overflow = prevOverflow
-      window.removeEventListener('keydown', onKeyDown)
     }
-  }, [open, onClose])
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -49,8 +49,17 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
       return
     }
 
-    onToast?.('Berhasil masuk (demo).')
-    onClose?.()
+    const email = login.email.trim()
+    const password = login.password
+
+    if (email === 'admin@gmail.com' && password === 'admin123') {
+      onToast?.('Berhasil masuk.')
+      onLoginSuccess?.()
+      onClose?.()
+      return
+    }
+
+    setError('Email atau password salah.')
   }
 
   const submitRegister = (e) => {
@@ -78,9 +87,6 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose?.()
-      }}
     >
       <div className="w-full max-w-md glass-strong rounded-3xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.6)] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
@@ -89,7 +95,9 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
               <i data-lucide="shield" className="w-5 h-5 text-black"></i>
             </div>
             <div>
-              <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-amber-400">Scolis.ai</p>
+              <p className="font-oswald font-500 text-lg leading-none">
+                Scolis<span className="text-amber-400">.ai</span>
+              </p>
               <h3 className="font-oswald font-light text-2xl leading-tight">{title}</h3>
             </div>
           </div>
@@ -153,14 +161,24 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
               </div>
               <div>
                 <label className="block text-xs text-gray-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={login.password}
-                  onChange={(e) => setLogin((s) => ({ ...s, password: e.target.value }))}
-                  placeholder="Masukkan password"
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                  autoComplete="current-password"
-                />
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    value={login.password}
+                    onChange={(e) => setLogin((s) => ({ ...s, password: e.target.value }))}
+                    placeholder="Masukkan password"
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 pl-4 pr-12 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl glass hover:bg-white/10 transition-colors flex items-center justify-center"
+                    onClick={() => setShowLoginPassword((v) => !v)}
+                    aria-label={showLoginPassword ? 'Sembunyikan password' : 'Lihat password'}
+                  >
+                    <i data-lucide={showLoginPassword ? 'eye-off' : 'eye'} className="w-4 h-4 text-gray-200"></i>
+                  </button>
+                </div>
               </div>
 
               <button
@@ -197,25 +215,45 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast }
               </div>
               <div>
                 <label className="block text-xs text-gray-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={register.password}
-                  onChange={(e) => setRegister((s) => ({ ...s, password: e.target.value }))}
-                  placeholder="Buat password"
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    type={showRegisterPassword ? 'text' : 'password'}
+                    value={register.password}
+                    onChange={(e) => setRegister((s) => ({ ...s, password: e.target.value }))}
+                    placeholder="Buat password"
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 pl-4 pr-12 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl glass hover:bg-white/10 transition-colors flex items-center justify-center"
+                    onClick={() => setShowRegisterPassword((v) => !v)}
+                    aria-label={showRegisterPassword ? 'Sembunyikan password' : 'Lihat password'}
+                  >
+                    <i data-lucide={showRegisterPassword ? 'eye-off' : 'eye'} className="w-4 h-4 text-gray-200"></i>
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-xs text-gray-300 mb-2">Konfirmasi Password</label>
-                <input
-                  type="password"
-                  value={register.confirmPassword}
-                  onChange={(e) => setRegister((s) => ({ ...s, confirmPassword: e.target.value }))}
-                  placeholder="Ulangi password"
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    type={showRegisterConfirmPassword ? 'text' : 'password'}
+                    value={register.confirmPassword}
+                    onChange={(e) => setRegister((s) => ({ ...s, confirmPassword: e.target.value }))}
+                    placeholder="Ulangi password"
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 pl-4 pr-12 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl glass hover:bg-white/10 transition-colors flex items-center justify-center"
+                    onClick={() => setShowRegisterConfirmPassword((v) => !v)}
+                    aria-label={showRegisterConfirmPassword ? 'Sembunyikan password' : 'Lihat password'}
+                  >
+                    <i data-lucide={showRegisterConfirmPassword ? 'eye-off' : 'eye'} className="w-4 h-4 text-gray-200"></i>
+                  </button>
+                </div>
               </div>
 
               <button

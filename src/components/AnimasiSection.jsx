@@ -847,7 +847,7 @@ export default function AnimasiSection() {
       <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[180px]"></div>
       <div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[150px]"></div>
 
-      <div className="relative z-10 flex flex-col items-center gap-6 px-6 anim">
+      <div className="relative z-10 flex flex-col items-center gap-6 px-4 sm:px-6 anim">
         <div className="text-center mb-2">
           <p className="text-[10px] font-semibold tracking-[0.3em] uppercase mb-2 text-emerald-400">
             RAG Pipeline Workflow
