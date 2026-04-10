@@ -21,6 +21,12 @@ export default function App() {
     else window.localStorage.removeItem('adminAuthed')
   }, [isAdminAuthed])
 
+  const logoutAndRefresh = () => {
+    window.localStorage.removeItem('adminAuthed')
+    const url = window.location.origin + window.location.pathname + window.location.search
+    window.location.assign(url)
+  }
+
   const initIcons = () => {
     if (window.lucide?.createIcons) window.lucide.createIcons()
   }
@@ -159,7 +165,7 @@ export default function App() {
     }
   }, [])
 
-  if (isAdminAuthed) return <Dashboard onLogout={() => setIsAdminAuthed(false)} />
+  if (isAdminAuthed) return <Dashboard onLogout={logoutAndRefresh} />
 
   return (
     <>
@@ -184,7 +190,7 @@ export default function App() {
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
             <span className="font-oswald font-500 text-lg sm:text-xl tracking-tight truncate max-w-[60vw] sm:max-w-none">
-              Scolis<span className="text-amber-400">.ai</span>
+              MyBing<span className="text-amber-400">.ai</span>
             </span>
         </a>
         <div className="hidden md:flex items-center gap-8 justify-self-center">
@@ -220,7 +226,7 @@ export default function App() {
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                 <i data-lucide="brain" className="w-5 h-5 text-black"></i>
             </div>
-            <span className="font-oswald font-500 text-lg sm:text-xl">Scolis<span className="text-amber-400">.ai</span></span>
+            <span className="font-oswald font-500 text-lg sm:text-xl">MyBing<span className="text-amber-400">.ai</span></span>
         </div>
         <button type="button" onClick={toggleMobile} className="text-white" aria-label="Tutup menu"><i data-lucide="x" className="w-6 h-6"></i></button>
     </div>
@@ -605,7 +611,7 @@ export default function App() {
                                         <i data-lucide="sparkles" className="w-4 h-4 text-blue-400"></i>
                                         <span className="text-[10px] font-semibold tracking-wider uppercase text-blue-400">AI Generated Copy</span>
                                     </div>
-                                    <p className="text-xs text-gray-300 leading-relaxed italic">"Transformasi digital bisnis Anda dimulai di sini. Solusi AI Scolis.ai membantu 500+ perusahaan meningkatkan efisiensi hingga 10x lipat. Gabung sekarang!"</p>
+                                    <p className="text-xs text-gray-300 leading-relaxed italic">"Transformasi digital bisnis Anda dimulai di sini. Solusi AI MyBing.ai membantu 500+ perusahaan meningkatkan efisiensi hingga 10x lipat. Gabung sekarang!"</p>
                                     <div className="flex items-center gap-2 mt-3">
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">LinkedIn</span>
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Instagram</span>
@@ -787,14 +793,14 @@ export default function App() {
                 Angka yang <span className="gradient-text">Berbicara</span>
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-                Hasil nyata yang telah dirasakan oleh ratusan perusahaan yang menggunakan Scolis.ai.
+                Hasil nyata yang telah dirasakan oleh ratusan perusahaan yang menggunakan MyBing.ai.
             </p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             <div className="scroll-reveal glass rounded-3xl p-6 text-center card-hover">
                 <p className="stat-number font-oswald text-4xl md:text-5xl font-light mb-2" data-count="500">0</p>
                 <p className="text-[11px] font-semibold tracking-widest uppercase text-amber-400 mb-1">Perusahaan</p>
-                <p className="text-gray-500 text-xs">Aktif menggunakan Scolis.ai</p>
+                <p className="text-gray-500 text-xs">Aktif menggunakan MyBing.ai</p>
             </div>
             <div className="scroll-reveal glass rounded-3xl p-6 text-center card-hover" style={{ transitionDelay: '0.1s' }}>
                 <p className="stat-number font-oswald text-4xl md:text-5xl font-light mb-2" data-count="10">0</p>
@@ -813,13 +819,13 @@ export default function App() {
             </div>
         </div>
         <div className="scroll-reveal glass rounded-3xl p-6 md:p-8 overflow-x-auto">
-            <h3 className="font-oswald font-light text-xl mb-6 text-center">Perbandingan: Sebelum vs Sesudah Scolis.ai</h3>
+            <h3 className="font-oswald font-light text-xl mb-6 text-center">Perbandingan: Sebelum vs Sesudah MyBing.ai</h3>
             <table className="w-full min-w-[500px]">
                 <thead>
                     <tr className="border-b border-white/10">
                         <th className="text-left text-xs font-semibold tracking-wider uppercase text-gray-400 pb-4 pr-4">Metrik</th>
                         <th className="text-center text-xs font-semibold tracking-wider uppercase text-red-400 pb-4 px-4">Tanpa AI</th>
-                        <th className="text-center text-xs font-semibold tracking-wider uppercase text-green-400 pb-4 pl-4">Dengan Scolis.ai</th>
+                        <th className="text-center text-xs font-semibold tracking-wider uppercase text-green-400 pb-4 pl-4">Dengan MyBing.ai</th>
                     </tr>
                 </thead>
                 <tbody className="text-sm">
@@ -872,7 +878,7 @@ export default function App() {
                     <i data-lucide="star" className="w-4 h-4 text-amber-400 fill-amber-400"></i>
                 </div>
                 <p className="text-sm text-gray-300 leading-relaxed mb-6">
-                    "Automasi dokumen Scolis.ai mengubah operasional kami total. Proses KYC yang biasa 3 hari sekarang selesai dalam 15 menit. ROI tercapai dalam 2 bulan pertama."
+                    "Automasi dokumen MyBing.ai mengubah operasional kami total. Proses KYC yang biasa 3 hari sekarang selesai dalam 15 menit. ROI tercapai dalam 2 bulan pertama."
                 </p>
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black font-bold text-sm">AS</div>
@@ -891,7 +897,7 @@ export default function App() {
                     <i data-lucide="star" className="w-4 h-4 text-amber-400 fill-amber-400"></i>
                 </div>
                 <p className="text-sm text-gray-300 leading-relaxed mb-6">
-                    "Tim marketing kami sekarang 5x lebih produktif. AI content generator Scolis.ai menghasilkan copy yang konsisten dan convert rate naik 47%. Game changer!"
+                    "Tim marketing kami sekarang 5x lebih produktif. AI content generator MyBing.ai menghasilkan copy yang konsisten dan convert rate naik 47%. Game changer!"
                 </p>
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">RP</div>
@@ -1004,7 +1010,7 @@ export default function App() {
                 Siap Transformasi <span className="gradient-text">dengan AI?</span>
             </h2>
             <p className="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed mb-10">
-                Jadwalkan demo gratis dan lihat langsung bagaimana Scolis.ai dapat mengubah operasional bisnis Anda.
+                Jadwalkan demo gratis dan lihat langsung bagaimana MyBing.ai dapat mengubah operasional bisnis Anda.
             </p>
             <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -1038,7 +1044,7 @@ export default function App() {
                     <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
                         <i data-lucide="brain" className="w-5 h-5 text-black"></i>
                     </div>
-                    <span className="font-oswald font-500 text-xl">Scolis<span className="text-amber-400">.ai</span></span>
+                    <span className="font-oswald font-500 text-xl">MyBing<span className="text-amber-400">.ai</span></span>
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed mb-4">
                     Platform solusi kecerdasan buatan terdepan untuk transformasi digital bisnis Indonesia.
@@ -1087,7 +1093,7 @@ export default function App() {
             </div>
         </div>
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-gray-600">© 2025 Scolis.ai. All rights reserved.</p>
+            <p className="text-[11px] text-gray-600">© 2025 MyBing.ai. All rights reserved.</p>
             <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                 <span className="text-[11px] text-gray-500">Semua sistem operasional</span>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import DokumenTemplate from './DokumenTemplate.jsx'
 import MarketingTemplate from './MarketingTemplate.jsx'
+import SupportTemplate from './SupportTemplate.jsx'
 
 const TYPE_COLORS = { doc: '#F59E0B', mkt: '#3B82F6', sup: '#10B981' }
 const TYPE_LABELS = { doc: 'Dokumen', mkt: 'Marketing', sup: 'Support' }
@@ -1017,9 +1018,9 @@ export default function Workflow() {
       )}
 
       {createOpen ? (
-        <div className="fixed inset-0 z-[110]">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg glass-strong rounded-2xl p-6">
+          <div className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto glass-strong rounded-2xl p-5 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="font-oswald font-light text-xl">Buat Workflow Baru</h2>
@@ -1105,6 +1106,8 @@ export default function Workflow() {
                   <DokumenTemplate />
                 ) : newCat === 'mkt' ? (
                   <MarketingTemplate />
+                ) : newCat === 'sup' ? (
+                  <SupportTemplate />
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -1153,9 +1156,9 @@ export default function Workflow() {
       ) : null}
 
       {importOpen ? (
-        <div className="fixed inset-0 z-[110]">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md glass-strong rounded-2xl p-6">
+          <div className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto glass-strong rounded-2xl p-5 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-oswald font-light text-xl">Import Workflow</h2>
               <button type="button" onClick={() => setImportOpen(false)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors" aria-label="Tutup">

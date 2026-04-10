@@ -184,6 +184,7 @@ export default function Dashboard({ onLogout }) {
   }, [])
 
   useEffect(() => {
+    if (activeNav !== 'overview') return
     const cv = mainChartRef.current
     if (!cv) return
 
@@ -277,15 +278,16 @@ export default function Dashboard({ onLogout }) {
       drawLine(data.doc, 'rgb(245,158,11)', 0.1)
     }
 
-    const t = window.setTimeout(drawMainChart, 100)
+    const t = window.setTimeout(drawMainChart, 0)
     window.addEventListener('resize', drawMainChart)
     return () => {
       window.clearTimeout(t)
       window.removeEventListener('resize', drawMainChart)
     }
-  }, [chartType])
+  }, [chartType, activeNav])
 
   useEffect(() => {
+    if (activeNav !== 'overview') return
     const cv = donutRef.current
     if (!cv) return
     const ctx = cv.getContext('2d')
@@ -336,7 +338,7 @@ export default function Dashboard({ onLogout }) {
     ctx.fillStyle = 'rgba(255,255,255,0.35)'
     ctx.font = '9px Inter, sans-serif'
     ctx.fillText('total ops', cx, cy + 12)
-  }, [])
+  }, [activeNav])
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
@@ -371,7 +373,7 @@ export default function Dashboard({ onLogout }) {
               </div>
               <div>
                 <span className="font-oswald font-500 text-lg tracking-tight">
-                  Scolis<span className="text-amber-400">.ai</span>
+                  MyBing<span className="text-amber-400">.ai</span>
                 </span>
                 <p className="text-[9px] text-gray-500 font-medium tracking-wider uppercase -mt-0.5">Dashboard</p>
               </div>

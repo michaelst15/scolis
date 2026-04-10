@@ -96,7 +96,7 @@ export default function AuthModal({ open, mode, onModeChange, onClose, onToast, 
             </div>
             <div>
               <p className="font-oswald font-500 text-lg leading-none">
-                Scolis<span className="text-amber-400">.ai</span>
+                MyBing<span className="text-amber-400">.ai</span>
               </p>
               <h3 className="font-oswald font-light text-2xl leading-tight">{title}</h3>
             </div>
