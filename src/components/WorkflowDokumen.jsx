@@ -22,6 +22,24 @@ const NODES = [
   { id: 'O', px: 25, py: 92, label: 'Update DB & Konfirmasi', type: 'ok' },
 ]
 
+const MOBILE_GRID = {
+  A: { c: 0, r: 0 },
+  B: { c: 1, r: 0 },
+  C: { c: 2, r: 0 },
+  E: { c: 0, r: 1 },
+  D: { c: 1, r: 1 },
+  F: { c: 2, r: 1 },
+  I: { c: 0, r: 2 },
+  H: { c: 1, r: 2 },
+  G: { c: 2, r: 2 },
+  J: { c: 0, r: 3 },
+  K: { c: 0, r: 4 },
+  L: { c: 0, r: 5 },
+  M: { c: 1, r: 5 },
+  O: { c: 0, r: 6 },
+  N: { c: 1, r: 6 },
+}
+
 const EDGES = [
   { from: 'A', to: 'B', fp: 'right', tp: 'left' },
   { from: 'B', to: 'C', fp: 'right', tp: 'left' },
@@ -79,68 +97,41 @@ function calcPositions(rect, nw, nh) {
   const maxY = 96
   const byId = {}
   const isMobile = rect.width < 520
+  if (isMobile) {
+    const padX = 26
+    const padY = 24
+    const colCount = 3
+    const rowCount = 7
+    const stepX = (rect.width - padX * 2) / (colCount - 1)
+    const stepY = (rect.height - padY * 2) / (rowCount - 1)
+    NODES.forEach((n) => {
+      const g = MOBILE_GRID[n.id] ?? { c: 1, r: 0 }
+      const x = clamp(padX + g.c * stepX, nw / 2 + 6, rect.width - nw / 2 - 6)
+      const y = clamp(padY + g.r * stepY, nh / 2 + 6, rect.height - nh / 2 - 6)
+      byId[n.id] = { x, y, type: n.type }
+    })
+    return byId
+  }
+
   const cx = rect.width / 2
   const cy = rect.height / 2
-  const spreadX = isMobile ? 0.9 : 0.95
-  const spreadY = isMobile ? 0.98 : 1.0
+  const spreadX = 0.95
+  const spreadY = 1.0
   const padX = Math.max(12, Math.round(nw * 0.1))
   const padY = Math.max(12, Math.round(nh * 0.4))
 
   const clampX = (x) => clamp(x, nw / 2 + padX, rect.width - nw / 2 - padX)
   const clampY = (y) => clamp(y, nh / 2 + padY, rect.height - nh / 2 - padY)
-  const tmp = []
 
   NODES.forEach((n) => {
-    let px = n.px
-    let py = n.py
-    if (isMobile) {
-      // Compact horizontal layout, increase vertical spacing
-      if (px > 50) px = 50 + (px - 50) * 0.85
-      if (px < 50) px = 50 - (50 - px) * 0.85
-      py = 4 + (py - 4) * 1.02
-      if (n.id === 'J') py += 4
-      if (n.id === 'G' || n.id === 'H' || n.id === 'I') py -= 2
-    }
-    let x = (px / 100) * rect.width
-    let y = minY + ((py - minPy) / (maxPy - minPy)) * (maxY - minY)
+    let x = (n.px / 100) * rect.width
+    let y = minY + ((n.py - minPy) / (maxPy - minPy)) * (maxY - minY)
     y = (y / 100) * rect.height
     x = cx + (x - cx) * spreadX
     y = cy + (y - cy) * spreadY
     x = clampX(x)
     y = clampY(y)
-    tmp.push({ id: n.id, x, y, type: n.type })
-  })
-
-  if (isMobile) {
-    const minDx = nw * 1.65
-    const minDy = nh * 1.35
-    for (let pass = 0; pass < 6; pass++) {
-      for (let i = 0; i < tmp.length; i++) {
-        for (let j = i + 1; j < tmp.length; j++) {
-          const a = tmp[i]
-          const b = tmp[j]
-          const dx = a.x - b.x
-          const dy = a.y - b.y
-          if (Math.abs(dx) < minDx && Math.abs(dy) < minDy) {
-            const pushX = (minDx - Math.abs(dx)) / 2 + 1
-            const sx = dx >= 0 ? 1 : -1
-            a.x = clampX(a.x + sx * pushX)
-            b.x = clampX(b.x - sx * pushX)
-
-            if (Math.abs(a.x - b.x) < minDx * 0.85) {
-              const pushY = (minDy - Math.abs(dy)) / 2.2 + 0.5
-              const sy = dy >= 0 ? 1 : -1
-              a.y = clampY(a.y + sy * pushY)
-              b.y = clampY(b.y - sy * pushY)
-            }
-          }
-        }
-      }
-    }
-  }
-
-  tmp.forEach((p) => {
-    byId[p.id] = { x: p.x, y: p.y, type: p.type }
+    byId[n.id] = { x, y, type: n.type }
   })
   return byId
 }
@@ -166,43 +157,40 @@ function gp(pos, nw, nh, p) {
   }
 }
 
-function laneOffset(edge, isMobile) {
-  if (!isMobile) return 0
-  const k = edgeKey(edge.from, edge.to)
-  const map = {
-    [edgeKey('C', 'D')]: 14,
-    [edgeKey('C', 'E')]: -14,
-    [edgeKey('F', 'G')]: 8,
-    [edgeKey('I', 'J')]: -10,
-    [edgeKey('J', 'K')]: -6,
-    [edgeKey('K', 'L')]: -14,
-    [edgeKey('K', 'M')]: 14,
-    [edgeKey('M', 'N')]: 10,
-    [edgeKey('L', 'O')]: -8,
-  }
-  return map[k] ?? 0
-}
-
 function makePD(edge, posById, nw, nh, isMobile) {
-  const a = gp(posById[edge.from], nw, nh, edge.fp)
-  const b = gp(posById[edge.to], nw, nh, edge.tp)
-  const lane = laneOffset(edge, isMobile)
-  const isH = (edge.fp === 'right' && edge.tp === 'left') || (edge.fp === 'left' && edge.tp === 'right')
+  let { fp, tp } = edge
+  if (isMobile && edge.from === 'I' && edge.to === 'J') {
+    fp = 'bottom'
+    tp = 'top'
+  }
+
+  const a = gp(posById[edge.from], nw, nh, fp)
+  const b = gp(posById[edge.to], nw, nh, tp)
+
+  const isH = (fp === 'right' && tp === 'left') || (fp === 'left' && tp === 'right')
   if (isH) {
     if (Math.abs(a.y - b.y) < 1) return `M${a.x},${a.y}L${b.x},${b.y}`
-    const mx = (a.x + b.x) / 2 + lane
+    const mx = (a.x + b.x) / 2
     return `M${a.x},${a.y}L${mx},${a.y}L${mx},${b.y}L${b.x},${b.y}`
   }
-  const isV = (edge.fp === 'bottom' && edge.tp === 'top')
+
+  const isV = (fp === 'bottom' && tp === 'top')
   if (isV) {
-    if (!lane) return `M${a.x},${a.y}L${b.x},${b.y}`
-    const vx = a.x + lane
-    return `M${a.x},${a.y}L${vx},${a.y}L${vx},${b.y}L${b.x},${b.y}`
+    if (Math.abs(a.x - b.x) < 1) return `M${a.x},${a.y}L${b.x},${b.y}`
+    const my = (a.y + b.y) / 2
+    return `M${a.x},${a.y}L${a.x},${my}L${b.x},${my}L${b.x},${b.y}`
   }
-  const my = (a.y + b.y) / 2
-  if (!lane) return `M${a.x},${a.y}L${a.x},${my}L${b.x},${my}L${b.x},${b.y}`
-  const vx = a.x + lane
-  return `M${a.x},${a.y}L${vx},${a.y}L${vx},${my}L${b.x},${my}L${b.x},${b.y}`
+
+  let my = (a.y + b.y) / 2
+  if (isMobile) {
+    const k = edgeKey(edge.from, edge.to)
+    if (k === edgeKey('C', 'D')) my = a.y + (b.y - a.y) * 0.35
+    if (k === edgeKey('C', 'E')) my = a.y + (b.y - a.y) * 0.65
+    if (k === edgeKey('K', 'M')) my = a.y + (b.y - a.y) * 0.35
+    if (k === edgeKey('K', 'L')) my = a.y + (b.y - a.y) * 0.65
+  }
+
+  return `M${a.x},${a.y}L${a.x},${my}L${b.x},${my}L${b.x},${b.y}`
 }
 
 function makeLoopPD(posById, nw, rectWidth, isMobile) {
@@ -212,8 +200,8 @@ function makeLoopPD(posById, nw, rectWidth, isMobile) {
   const ay = n.y
   const bx = j.x + nw / 2
   const by = j.y
-  const off = isMobile ? Math.min(26, Math.max(14, nw * 0.75)) : Math.min(32, Math.max(18, nw))
-  const loopX = Math.min(ax, bx) - off
+  const off = isMobile ? 24 : Math.min(32, Math.max(18, nw))
+  const loopX = Math.max(ax, bx) + off
   return `M${ax},${ay}L${loopX},${ay}L${loopX},${by}L${bx},${by}`
 }
 
