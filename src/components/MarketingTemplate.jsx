@@ -21,12 +21,12 @@ export default function MarketingTemplate() {
   })
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {items.map((n) => (
         <button
           key={n.label}
           type="button"
-          className="flex items-center gap-2 bg-white/[.04] border border-white/10 rounded-xl px-3 py-2 text-left transition-all active:scale-[0.98] hover:bg-white/[.06] hover:border-white/20"
+          className="flex items-center gap-2 bg-white/[.04] border border-white/10 rounded-xl px-3 py-2 text-left transition-all active:scale-[0.98] hover:bg-white/[.06] hover:border-white/20 w-full"
         >
           <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: n.bg, border: `1px solid ${n.bc}` }}>
             <i data-lucide={n.ico} className="w-4 h-4" style={{ color: n.ic }}></i>

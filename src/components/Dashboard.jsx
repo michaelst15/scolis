@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Workflow from './Workflow.jsx'
+import Workflow, { INITIAL_WORKFLOWS, WORKFLOWS_STORAGE_KEY } from './Workflow.jsx'
+import WorkflowDokumen from './WorkflowDokumen.jsx'
 
 const DAYS = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']
 const CHART_DATA = {
@@ -125,6 +126,16 @@ export default function Dashboard({ onLogout }) {
   const [mobileUserTipOpen, setMobileUserTipOpen] = useState(false)
   const [greeting, setGreeting] = useState(() => getGreetingByHour())
   const [dateLabel, setDateLabel] = useState(() => getDateLabel())
+  const [workflows, setWorkflows] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem(WORKFLOWS_STORAGE_KEY)
+      if (!raw) return INITIAL_WORKFLOWS
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+    } catch {}
+    return INITIAL_WORKFLOWS
+  })
+  const [docSelectedId, setDocSelectedId] = useState(null)
 
   const mainChartRef = useRef(null)
   const donutRef = useRef(null)
@@ -156,6 +167,12 @@ export default function Dashboard({ onLogout }) {
   useEffect(() => {
     window.lucide?.createIcons?.()
   }, [sidebarOpen, activeNav, chartType, animateBars])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(WORKFLOWS_STORAGE_KEY, JSON.stringify(workflows))
+    } catch {}
+  }, [workflows])
 
   useEffect(() => {
     if (!mobileUserTipOpen) return
@@ -559,7 +576,7 @@ export default function Dashboard({ onLogout }) {
             }}
           >
             {activeNav === 'workflow' ? (
-              <Workflow />
+              <Workflow workflows={workflows} setWorkflows={setWorkflows} />
             ) : activeNav === 'overview' ? (
               <>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
@@ -856,6 +873,17 @@ export default function Dashboard({ onLogout }) {
               </div>
             </div>
               </>
+            ) : activeNav === 'dokumen' ? (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
+                  <div>
+                    <h1 className="font-oswald font-light text-2xl tracking-tight">Dokumen</h1>
+                    <p className="text-gray-500 text-xs mt-0.5">Workflow dokumen yang sudah dibuat akan muncul di sini.</p>
+                  </div>
+                </div>
+
+                <DokumenWorkflows workflows={workflows} selectedId={docSelectedId} onSelect={setDocSelectedId} />
+              </div>
             ) : (
               <div className="glass rounded-2xl p-6 text-sm text-gray-400">
                 Menu ini masih dalam pengembangan.
@@ -863,6 +891,65 @@ export default function Dashboard({ onLogout }) {
             )}
           </main>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function DokumenWorkflows({ workflows, selectedId, onSelect }) {
+  const docs = useMemo(() => workflows.filter((w) => w.type === 'doc'), [workflows])
+  const selected = useMemo(() => docs.find((w) => w.id === selectedId) || docs[0] || null, [docs, selectedId])
+
+  useEffect(() => {
+    if (!selected) return
+    if (selectedId === selected.id) return
+    onSelect?.(selected.id)
+  }, [selected, selectedId, onSelect])
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4">
+      <div className="glass rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Daftar Workflow</h3>
+          <span className="text-[10px] text-gray-500">{docs.length}</span>
+        </div>
+        {docs.length ? (
+          <div className="space-y-2">
+            {docs.map((w) => (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => onSelect?.(w.id)}
+                className={
+                  'w-full text-left rounded-xl px-3 py-2 border transition-colors ' +
+                  (selected?.id === w.id ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/[.02] border-white/10 hover:bg-white/[.04]')
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="file-text" className="w-4 h-4 text-amber-400"></i>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate text-gray-200">{w.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{w.trigger ?? '—'} · dibuat {w.created ?? '—'}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-500">
+            Belum ada workflow dokumen. Buat dulu dari menu Workflow dengan kategori Dokumen.
+          </div>
+        )}
+      </div>
+
+      <div className="glass rounded-2xl p-5">
+        {selected ? (
+          <WorkflowDokumen title={selected.name} />
+        ) : (
+          <div className="text-sm text-gray-500">Pilih workflow dokumen untuk melihat detail flow.</div>
+        )}
       </div>
     </div>
   )

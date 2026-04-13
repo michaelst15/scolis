@@ -1,0 +1,28 @@
+ Volume in drive K has no label.
+ Volume Serial Number is BA60-48E9
+
+ Directory of K:\AI Project
+
+10/04/2026  13.26    <DIR>          .
+10/04/2026  13.26    <DIR>          ..
+10/04/2026  06.52                29 .gitignore
+10/04/2026  09.24    <DIR>          dist
+10/04/2026  06.53               758 index.html
+10/04/2026  13.26                 0 netview_BangTob_20260410_132637.txt
+07/04/2026  10.33    <DIR>          node_modules
+07/04/2026  10.33            78.151 package-lock.json
+07/04/2026  10.33               474 package.json
+10/04/2026  06.52                91 postcss.config.js
+07/04/2026  07.57    <DIR>          src
+10/04/2026  06.52               241 tailwind.config.js
+10/04/2026  06.52               134 vite.config.js
+               8 File(s)         79.878 bytes
+               5 Dir(s)  142.786.592.768 bytes free
+ 
+[Path: \\BangTob\Project\AI Project\.git] 
+ 
+[Path: \\BangTob\Project\AI Project\dist] 
+ 
+[Path: \\BangTob\Project\AI Project\node_modules] 
+ 
+[Path: \\BangTob\Project\AI Project\src] 

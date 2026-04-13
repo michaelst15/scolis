@@ -38,19 +38,19 @@ export default function SupportTemplate() {
   })
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 overflow-x-auto pb-1">
         {flow.top.map((n, idx) => (
-          <div key={n.label} className="flex items-center gap-2 flex-shrink-0">
+          <div key={n.label} className="flex items-center gap-3 flex-shrink-0">
             <Node {...n} />
             {idx < flow.top.length - 1 ? <i data-lucide="chevron-right" className="w-4 h-4 text-gray-600 flex-shrink-0"></i> : null}
           </div>
         ))}
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+ 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {flow.branches.map((n) => (
-          <div key={n.label} className="flex items-center gap-2">
+          <div key={n.label} className="flex items-center gap-3">
             <i data-lucide="corner-down-right" className="w-4 h-4 text-gray-600 flex-shrink-0"></i>
             <div className="flex-1">
               <Node {...n} />
@@ -58,8 +58,8 @@ export default function SupportTemplate() {
           </div>
         ))}
       </div>
-
-      <div className="flex items-center gap-2">
+ 
+      <div className="flex items-center gap-3">
         <i data-lucide="arrow-down" className="w-4 h-4 text-gray-600 flex-shrink-0"></i>
         <div className="flex-1">
           <Node {...flow.end} />

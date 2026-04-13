@@ -1,0 +1,15 @@
+ Volume in drive G has no label.
+ Volume Serial Number is BA60-48E9
+
+ Directory of G:\AI Project\src
+
+10/04/2026  13.26    <DIR>          .
+10/04/2026  13.26    <DIR>          ..
+10/04/2026  06.53            79.145 App.jsx
+10/04/2026  08.58    <DIR>          components
+07/04/2026  08.07    <DIR>          image
+10/04/2026  06.52             6.023 index.css
+10/04/2026  06.52               156 main.jsx
+10/04/2026  13.26                 0 netview_BangTob_20260410_132637.txt
+               4 File(s)         85.324 bytes
+               4 Dir(s)  142.786.519.040 bytes free

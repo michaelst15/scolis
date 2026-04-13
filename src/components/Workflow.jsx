@@ -135,7 +135,9 @@ const NODE_ICONS = {
   Output: 'send',
 }
 
-const INITIAL_WORKFLOWS = [
+export const WORKFLOWS_STORAGE_KEY = 'mybing.workflows'
+
+export const INITIAL_WORKFLOWS = [
   {
     id: 1,
     name: 'Invoice Processing',
@@ -381,8 +383,18 @@ function ToastStack({ toasts, onDismiss }) {
   )
 }
 
-export default function Workflow() {
-  const [workflows, setWorkflows] = useState(INITIAL_WORKFLOWS)
+export default function Workflow({ workflows: workflowsProp, setWorkflows: setWorkflowsProp }) {
+  const [internalWorkflows, setInternalWorkflows] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem(WORKFLOWS_STORAGE_KEY)
+      if (!raw) return INITIAL_WORKFLOWS
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+    } catch {}
+    return INITIAL_WORKFLOWS
+  })
+  const workflows = workflowsProp ?? internalWorkflows
+  const setWorkflows = setWorkflowsProp ?? setInternalWorkflows
   const [filter, setFilter] = useState('all')
   const [view, setView] = useState('grid')
   const [sort, setSort] = useState('recent')
@@ -416,6 +428,12 @@ export default function Workflow() {
   useEffect(() => {
     window.lucide?.createIcons?.()
   })
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(WORKFLOWS_STORAGE_KEY, JSON.stringify(workflows))
+    } catch {}
+  }, [workflows])
 
   useEffect(() => {
     if (!createOpen) return
