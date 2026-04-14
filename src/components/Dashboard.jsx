@@ -545,20 +545,20 @@ export default function Dashboard({ onLogout }) {
                   onClick={() => setMobileUserTipOpen((v) => !v)}
                   aria-label="Info pengguna"
                 >
-                  RA
+                  MT
                 </button>
                 {mobileUserTipOpen ? (
                   <div className="absolute z-[200] top-full right-0 mt-2 px-3 py-2 rounded-xl glass-strong text-white text-[11px] whitespace-nowrap shadow-[0_10px_35px_rgba(0,0,0,0.45)] pointer-events-none">
-                    Rizki Aditya
+                    Michael S Tobing
                   </div>
                 ) : null}
               </div>
               <div className="hidden sm:flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold">
-                  RA
+                  MT
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-medium">Rizki Aditya</p>
+                  <p className="text-xs font-medium">Michael S Tobing</p>
                   <p className="text-[10px] text-gray-500">Admin</p>
                 </div>
               </div>
@@ -586,7 +586,7 @@ export default function Dashboard({ onLogout }) {
               <>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
               <div>
-                <h1 className="font-oswald font-light text-2xl tracking-tight">{greeting}, Rizki</h1>
+                <h1 className="font-oswald font-light text-2xl tracking-tight">{greeting}, Michael</h1>
                 <p className="text-gray-500 text-xs mt-0.5">{dateLabel} — Berikut ringkasan operasional Anda hari ini.</p>
               </div>
             </div>
@@ -1795,10 +1795,10 @@ function SettingsView() {
             </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold">
-                RA
+                MT
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-200 truncate">Rizki Aditya</p>
+                <p className="text-xs font-medium text-gray-200 truncate">Michael S Tobing</p>
                 <p className="text-[10px] text-gray-500 truncate">Admin</p>
               </div>
             </div>
