@@ -436,9 +436,14 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
     }, 3500)
   }
 
+  const safeView = view === 'list' ? 'list' : 'grid'
+
   useEffect(() => {
-    window.lucide?.createIcons?.()
-  })
+    const raf = window.requestAnimationFrame(() => {
+      window.lucide?.createIcons?.()
+    })
+    return () => window.cancelAnimationFrame(raf)
+  }, [safeView, filter, sort, query, detailId, createOpen, importOpen, templateEdit])
 
   useEffect(() => {
     try {
@@ -569,14 +574,6 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
       }
     }
     if (cat === 'sup') {
-      if (k === 'wa_channel') {
-        return [
-          { name: 'waNumber', label: 'Nomor WhatsApp Bisnis', type: 'text', placeholder: 'Contoh: +62812xxxxxxx' },
-          { name: 'provider', label: 'Provider', type: 'select', options: ['Meta WhatsApp Cloud API', 'WATI', 'Qontak', 'Twilio', 'Lainnya'] },
-          { name: 'businessName', label: 'Nama Bisnis', type: 'text', placeholder: 'Contoh: MyBing.ai' },
-          { name: 'webhookPath', label: 'Webhook Path', type: 'text', placeholder: 'Contoh: /webhook/whatsapp' },
-        ]
-      }
       if (k === 'stock_sheet') {
         return [
           { name: 'sheetUrl', label: 'Google Sheets URL', type: 'url', placeholder: 'https://docs.google.com/...' },
@@ -734,7 +731,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
             <button
               type="button"
               onClick={() => setView('grid')}
-              className={'rounded-md p-1.5 transition-colors ' + (view === 'grid' ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5')}
+              className={'rounded-md p-1.5 transition-colors ' + (safeView === 'grid' ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5')}
               aria-label="Grid"
               title="Grid"
             >
@@ -743,7 +740,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
             <button
               type="button"
               onClick={() => setView('list')}
-              className={'rounded-md p-1.5 transition-colors ' + (view === 'list' ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5')}
+              className={'rounded-md p-1.5 transition-colors ' + (safeView === 'list' ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5')}
               aria-label="List"
               title="List"
             >
@@ -904,8 +901,8 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
             </div>
           </div>
         </div>
-      ) : view === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      ) : safeView === 'grid' ? (
+        <div key="grid" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.length ? (
             filtered.map((w, idx) => {
               const c = TYPE_COLORS[w.type]
@@ -1029,7 +1026,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div key="list" className="space-y-2">
           {filtered.length ? (
             filtered.map((w, idx) => {
               const c = TYPE_COLORS[w.type]
