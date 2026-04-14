@@ -90,9 +90,7 @@ function clamp(v, min, max) {
   return Math.min(max, Math.max(min, v))
 }
 
-function calcPositions(rect, nw, nh) {
-  const minPy = 4
-  const maxPy = 95
+function calcPositions(rect, nw, nh, nodes, mobileGrid) {
   const minY = 3
   const maxY = 96
   const byId = {}
@@ -100,17 +98,49 @@ function calcPositions(rect, nw, nh) {
   if (isMobile) {
     const padX = 26
     const padY = 24
-    const colCount = 3
-    const rowCount = 7
-    const stepX = (rect.width - padX * 2) / (colCount - 1)
-    const stepY = (rect.height - padY * 2) / (rowCount - 1)
-    NODES.forEach((n) => {
-      const g = MOBILE_GRID[n.id] ?? { c: 1, r: 0 }
+    let maxC = 0
+    let maxR = 0
+    if (mobileGrid) {
+      Object.values(mobileGrid).forEach((g) => {
+        if (!g) return
+        if (g.c > maxC) maxC = g.c
+        if (g.r > maxR) maxR = g.r
+      })
+    }
+    const colCount = Math.max(1, maxC + 1)
+    const rowCount = Math.max(1, maxR + 1, nodes.length)
+    const stepX = colCount <= 1 ? 0 : (rect.width - padX * 2) / (colCount - 1)
+    const stepY = rowCount <= 1 ? 0 : (rect.height - padY * 2) / (rowCount - 1)
+    nodes.forEach((n, idx) => {
+      const g = mobileGrid?.[n.id] ?? { c: 0, r: idx }
       const x = clamp(padX + g.c * stepX, nw / 2 + 6, rect.width - nw / 2 - 6)
       const y = clamp(padY + g.r * stepY, nh / 2 + 6, rect.height - nh / 2 - 6)
       byId[n.id] = { x, y, type: n.type }
     })
     return byId
+  }
+
+  let minPx = Infinity
+  let maxPx = -Infinity
+  let minPy = Infinity
+  let maxPy = -Infinity
+  nodes.forEach((n) => {
+    if (typeof n.px === 'number') {
+      if (n.px < minPx) minPx = n.px
+      if (n.px > maxPx) maxPx = n.px
+    }
+    if (typeof n.py === 'number') {
+      if (n.py < minPy) minPy = n.py
+      if (n.py > maxPy) maxPy = n.py
+    }
+  })
+  if (!Number.isFinite(minPx) || !Number.isFinite(maxPx) || minPx === maxPx) {
+    minPx = 0
+    maxPx = 100
+  }
+  if (!Number.isFinite(minPy) || !Number.isFinite(maxPy) || minPy === maxPy) {
+    minPy = 0
+    maxPy = 100
   }
 
   const cx = rect.width / 2
@@ -123,8 +153,8 @@ function calcPositions(rect, nw, nh) {
   const clampX = (x) => clamp(x, nw / 2 + padX, rect.width - nw / 2 - padX)
   const clampY = (y) => clamp(y, nh / 2 + padY, rect.height - nh / 2 - padY)
 
-  NODES.forEach((n) => {
-    let x = (n.px / 100) * rect.width
+  nodes.forEach((n) => {
+    let x = ((n.px - minPx) / (maxPx - minPx)) * rect.width
     let y = minY + ((n.py - minPy) / (maxPy - minPy)) * (maxY - minY)
     y = (y / 100) * rect.height
     x = cx + (x - cx) * spreadX
@@ -243,7 +273,11 @@ function labelPos(edge, posById, nw, nh) {
   return { x: mx + ox, y: my + oy }
 }
 
-export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }) {
+export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing', nodes: nodesProp, edges: edgesProp, seq: seqProp, mobileGrid: mobileGridProp }) {
+  const nodes = nodesProp ?? NODES
+  const edges = edgesProp ?? EDGES
+  const seq = seqProp ?? SEQ
+  const mobileGrid = mobileGridProp ?? MOBILE_GRID
   const containerRef = useRef(null)
   const svgRef = useRef(null)
   const pathRefMap = useRef({})
@@ -263,16 +297,16 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
 
   const computed = useMemo(() => {
     if (!layout) return null
-    const posById = calcPositions(layout.rect, layout.nw, layout.nh)
+    const posById = calcPositions(layout.rect, layout.nw, layout.nh, nodes, mobileGrid)
     const paths = {}
     const labels = {}
-    EDGES.forEach((e) => {
+    edges.forEach((e) => {
       const k = edgeKey(e.from, e.to)
       paths[k] = e.fp === 'loop' ? makeLoopPD(posById, layout.nw, layout.rect.width, layout.isMobile) : makePD(e, posById, layout.nw, layout.nh, layout.isMobile)
       if (e.lbl && e.fp !== 'loop') labels[k] = labelPos(e, posById, layout.nw, layout.nh)
     })
     return { posById, paths, labels }
-  }, [layout])
+  }, [layout, nodes, edges, mobileGrid])
 
   useEffect(() => {
     const el = containerRef.current
@@ -309,7 +343,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
   }
 
   const showNodeTip = (id, persist = false) => {
-    const n = NODES.find((x) => x.id === id)
+    const n = nodes.find((x) => x.id === id)
     if (!n) return
     const pos = computeTipPos(id)
     if (!pos) return
@@ -348,8 +382,8 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
   }
 
   const edgeTipLabel = (edge) => {
-    const from = NODES.find((n) => n.id === edge.from)?.label || edge.from
-    const to = NODES.find((n) => n.id === edge.to)?.label || edge.to
+    const from = nodes.find((n) => n.id === edge.from)?.label || edge.from
+    const to = nodes.find((n) => n.id === edge.to)?.label || edge.to
     return from + ' → ' + to + (edge.lbl ? ' • ' + edge.lbl : '')
   }
 
@@ -501,7 +535,9 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
 
     const celebrate = () => {
       const svgEl = svgRef.current
-      const o = computed.posById.O
+      const last = seq[seq.length - 1]
+      const finalId = last?.to || last?.from
+      const o = computed.posById[finalId]
       if (!svgEl || !o) return
       const cols = Object.values(TYPE_COLORS)
       const ps = []
@@ -550,9 +586,9 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
         resetAll()
         await wait(400)
         if (mg !== genRef.current) return
-        for (let i = 0; i < SEQ.length; i++) {
+        for (let i = 0; i < seq.length; i++) {
           if (mg !== genRef.current) return
-          const s = SEQ[i]
+          const s = seq[i]
           const k = edgeKey(s.from, s.to)
           setEdgeStatus((prev) => ({ ...prev, [k]: 'lit' }))
           if (computed.labels[k]) setLabelStatus((prev) => ({ ...prev, [k]: 'lit' }))
@@ -571,7 +607,9 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
           await wait(280)
         }
         if (mg !== genRef.current) return
-        setNodeStatus((prev) => ({ ...prev, O: 'done' }))
+        const last = seq[seq.length - 1]
+        const finalId = last?.to || last?.from
+        if (finalId) setNodeStatus((prev) => ({ ...prev, [finalId]: 'done' }))
         celebrate()
         await wait(1800)
       }
@@ -585,7 +623,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
       setLabelStatus({})
       setLogs([])
     }
-  }, [computed])
+  }, [computed, seq])
 
   const activeTip = nodeTip || edgeTip
 
@@ -630,7 +668,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
               </filter>
             </defs>
             {computed
-              ? EDGES.map((e) => {
+              ? edges.map((e) => {
                   const k = edgeKey(e.from, e.to)
                   const state = edgeStatus[k] || 'idle'
                   const col = TYPE_COLORS[computed.posById[e.from]?.type] || '#262b42'
@@ -659,7 +697,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
 
           {computed ? (
             <svg className="absolute inset-0 w-full h-full">
-              {EDGES.map((e) => {
+              {edges.map((e) => {
                 const k = edgeKey(e.from, e.to)
                 return (
                   <path
@@ -686,7 +724,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
           ) : null}
 
           {computed && layout && !layout.isMobile
-            ? EDGES.filter((e) => e.lbl && e.fp !== 'loop').map((e) => {
+            ? edges.filter((e) => e.lbl && e.fp !== 'loop').map((e) => {
                 const k = edgeKey(e.from, e.to)
                 const p = computed.labels[k]
                 const st = labelStatus[k] || 'idle'
@@ -707,11 +745,11 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
             : null}
 
           {computed
-            ? NODES.map((n) => {
+            ? nodes.map((n) => {
                 const pos = computed.posById[n.id]
                 const st = nodeStatus[n.id] || 'idle'
                 const c = TYPE_COLORS[n.type] || TYPE_COLORS.process
-                const icon = TYPE_ICONS[n.type] || 'settings'
+                const icon = n.icon || TYPE_ICONS[n.type] || 'settings'
                 const shadow =
                   st === 'active'
                     ? `0 0 10px ${c}55, 0 0 22px ${c}22`
