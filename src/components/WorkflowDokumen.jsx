@@ -247,6 +247,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
   const containerRef = useRef(null)
   const svgRef = useRef(null)
   const pathRefMap = useRef({})
+  const hitPathRefMap = useRef({})
   const nodeRefMap = useRef({})
   const genRef = useRef(0)
   const [layout, setLayout] = useState(null)
@@ -257,6 +258,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
   const [labelStatus, setLabelStatus] = useState({})
   const [activityExpanded, setActivityExpanded] = useState(false)
   const [nodeTip, setNodeTip] = useState(null)
+  const [edgeTip, setEdgeTip] = useState(null)
   const tipTimerRef = useRef(null)
 
   const computed = useMemo(() => {
@@ -311,16 +313,64 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
     if (!n) return
     const pos = computeTipPos(id)
     if (!pos) return
+    setEdgeTip(null)
     setNodeTip({ id, label: n.label, ...pos })
     if (!persist) return
     if (tipTimerRef.current) window.clearTimeout(tipTimerRef.current)
-    tipTimerRef.current = window.setTimeout(() => setNodeTip(null), 2500)
+    tipTimerRef.current = window.setTimeout(() => {
+      setNodeTip(null)
+      setEdgeTip(null)
+    }, 2500)
   }
 
   const hideNodeTip = (id) => {
     setNodeTip((prev) => {
       if (!prev) return prev
       if (id && prev.id !== id) return prev
+      return null
+    })
+  }
+
+  const computeEdgeTipPos = (k) => {
+    const svgEl = svgRef.current
+    const pe = hitPathRefMap.current[k] || pathRefMap.current[k]
+    if (!svgEl || !pe) return null
+    const len = pe.getTotalLength?.()
+    if (!len) return null
+    const pt = pe.getPointAtLength(len * 0.5)
+    const r = svgEl.getBoundingClientRect()
+    const midX = r.left + pt.x
+    const midY = r.top + pt.y
+    const topY = midY - 12
+    const bottomY = midY + 12
+    const useTop = topY > 42
+    return { x: midX, y: useTop ? topY : bottomY, place: useTop ? 'top' : 'bottom' }
+  }
+
+  const edgeTipLabel = (edge) => {
+    const from = NODES.find((n) => n.id === edge.from)?.label || edge.from
+    const to = NODES.find((n) => n.id === edge.to)?.label || edge.to
+    return from + ' → ' + to + (edge.lbl ? ' • ' + edge.lbl : '')
+  }
+
+  const showEdgeTip = (edge, persist = false) => {
+    const k = edgeKey(edge.from, edge.to)
+    const pos = computeEdgeTipPos(k)
+    if (!pos) return
+    setNodeTip(null)
+    setEdgeTip({ id: k, label: edgeTipLabel(edge), ...pos })
+    if (!persist) return
+    if (tipTimerRef.current) window.clearTimeout(tipTimerRef.current)
+    tipTimerRef.current = window.setTimeout(() => {
+      setNodeTip(null)
+      setEdgeTip(null)
+    }, 2500)
+  }
+
+  const hideEdgeTip = (k) => {
+    setEdgeTip((prev) => {
+      if (!prev) return prev
+      if (k && prev.id !== k) return prev
       return null
     })
   }
@@ -341,6 +391,21 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
   }, [nodeTip])
 
   useEffect(() => {
+    if (!edgeTip) return
+    const onReflow = () => {
+      const pos = computeEdgeTipPos(edgeTip.id)
+      if (!pos) return
+      setEdgeTip((prev) => (prev ? { ...prev, ...pos } : prev))
+    }
+    window.addEventListener('resize', onReflow)
+    window.addEventListener('scroll', onReflow, true)
+    return () => {
+      window.removeEventListener('resize', onReflow)
+      window.removeEventListener('scroll', onReflow, true)
+    }
+  }, [edgeTip])
+
+  useEffect(() => {
     if (!computed || !svgRef.current) return
 
     const wait = (ms) => new Promise((r) => window.setTimeout(r, ms))
@@ -350,6 +415,7 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
       setLabelStatus({})
       setLogs([])
       setNodeTip(null)
+      setEdgeTip(null)
     }
 
     const addLog = (text, br) => {
@@ -521,6 +587,8 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
     }
   }, [computed])
 
+  const activeTip = nodeTip || edgeTip
+
   return (
     <div className="w-full relative flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -534,6 +602,10 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
       <div
         ref={containerRef}
         className="relative rounded-2xl border border-white/10 overflow-hidden h-[72dvh] max-h-[800px] min-h-[480px]"
+        onClick={() => {
+          setNodeTip(null)
+          setEdgeTip(null)
+        }}
         style={{
           background: '#0d0f18',
           backgroundImage: 'radial-gradient(circle,#1a1d2e 1px,transparent 1px)',
@@ -584,6 +656,34 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
                 })
               : null}
           </svg>
+
+          {computed ? (
+            <svg className="absolute inset-0 w-full h-full">
+              {EDGES.map((e) => {
+                const k = edgeKey(e.from, e.to)
+                return (
+                  <path
+                    key={k}
+                    ref={(el) => {
+                      if (el) hitPathRefMap.current[k] = el
+                    }}
+                    d={computed.paths[k]}
+                    fill="none"
+                    stroke="transparent"
+                    strokeWidth={14}
+                    pointerEvents="stroke"
+                    onMouseEnter={() => showEdgeTip(e)}
+                    onMouseLeave={() => hideEdgeTip(k)}
+                    onClick={(ev) => {
+                      ev.stopPropagation()
+                      setEdgeTip((prev) => (prev?.id === k ? null : prev))
+                      window.setTimeout(() => showEdgeTip(e, true), 0)
+                    }}
+                  />
+                )
+              })}
+            </svg>
+          ) : null}
 
           {computed && layout && !layout.isMobile
             ? EDGES.filter((e) => e.lbl && e.fp !== 'loop').map((e) => {
@@ -671,16 +771,16 @@ export default function WorkflowDokumen({ title = 'n8n Flow — PO Processing' }
             : null}
       </div>
 
-      {nodeTip ? (
+      {activeTip ? (
         <div
           className="fixed z-[80] px-3 py-2 rounded-xl glass-strong border border-white/10 text-white text-[11px] shadow-[0_10px_35px_rgba(0,0,0,0.45)] pointer-events-none max-w-[260px]"
           style={{
-            left: nodeTip.x,
-            top: nodeTip.y,
-            transform: nodeTip.place === 'top' ? 'translate(-50%,-100%)' : 'translate(-50%,0)',
+            left: activeTip.x,
+            top: activeTip.y,
+            transform: activeTip.place === 'top' ? 'translate(-50%,-100%)' : 'translate(-50%,0)',
           }}
         >
-          {nodeTip.label}
+          {activeTip.label}
         </div>
       ) : null}
 

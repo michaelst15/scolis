@@ -405,8 +405,19 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
   const [importOpen, setImportOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [newCat, setNewCat] = useState('doc')
-  const [newTrigger, setNewTrigger] = useState('Webhook (HTTP POST)')
   const nameInputRef = useRef(null)
+  const [templateEdit, setTemplateEdit] = useState(null)
+  const [templateDraft, setTemplateDraft] = useState({})
+  const [templateFileName, setTemplateFileName] = useState('')
+  const [templateCfg, setTemplateCfg] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem('templateNodeConfig:v1')
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      if (parsed && typeof parsed === 'object') return parsed
+    } catch {}
+    return {}
+  })
 
   const [toasts, setToasts] = useState([])
 
@@ -520,8 +531,96 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
     setCreateOpen(false)
     setNewName('')
     setNewCat('doc')
-    setNewTrigger('Webhook (HTTP POST)')
     showToast(`Workflow "${name}" berhasil dibuat`, 'green')
+  }
+
+  const templateSchema = (cat, key) => {
+    const k = String(key || '')
+    if (cat === 'doc') {
+      if (k === 'po_source') {
+        return [
+          { name: 'channel', label: 'Sumber PO', type: 'select', options: ['Email', 'WhatsApp', 'Upload Manual', 'API'] },
+          { name: 'sample', label: 'Contoh PO (file)', type: 'file' },
+          { name: 'note', label: 'Catatan', type: 'textarea', placeholder: 'Contoh: format PO, aturan validasi, dsb.' },
+        ]
+      }
+      if (k === 'po_extract') {
+        return [
+          { name: 'fields', label: 'Field yang diekstrak', type: 'textarea', placeholder: 'Contoh: nomor PO, tanggal, nama customer, item, qty, harga, alamat' },
+          { name: 'sample', label: 'File contoh', type: 'file' },
+        ]
+      }
+    }
+    if (cat === 'mkt') {
+      if (k === 'nurture_list') {
+        return [
+          { name: 'listName', label: 'Nama Nurture List', type: 'text', placeholder: 'Contoh: Lead - April' },
+          { name: 'contacts', label: 'Kontak (CSV)', type: 'file' },
+          { name: 'tags', label: 'Tag', type: 'text', placeholder: 'Contoh: webinar, promo, hot-lead' },
+        ]
+      }
+      if (k === 'campaign') {
+        return [
+          { name: 'campaignName', label: 'Nama Campaign', type: 'text', placeholder: 'Contoh: Promo Lebaran' },
+          { name: 'channel', label: 'Channel', type: 'select', options: ['Instagram', 'TikTok', 'Email', 'Google Ads'] },
+          { name: 'brief', label: 'Brief / Asset (file)', type: 'file' },
+          { name: 'objective', label: 'Objective', type: 'textarea', placeholder: 'Contoh: traffic ke landing page, leads, conversion' },
+        ]
+      }
+    }
+    if (cat === 'sup') {
+      if (k === 'wa_channel') {
+        return [
+          { name: 'waNumber', label: 'Nomor WhatsApp Bisnis', type: 'text', placeholder: 'Contoh: +62812xxxxxxx' },
+          { name: 'provider', label: 'Provider', type: 'select', options: ['Meta WhatsApp Cloud API', 'WATI', 'Qontak', 'Twilio', 'Lainnya'] },
+          { name: 'businessName', label: 'Nama Bisnis', type: 'text', placeholder: 'Contoh: MyBing.ai' },
+          { name: 'webhookPath', label: 'Webhook Path', type: 'text', placeholder: 'Contoh: /webhook/whatsapp' },
+        ]
+      }
+      if (k === 'stock_sheet') {
+        return [
+          { name: 'sheetUrl', label: 'Google Sheets URL', type: 'url', placeholder: 'https://docs.google.com/...' },
+          { name: 'sheetTab', label: 'Nama Sheet/Tab', type: 'text', placeholder: 'Contoh: Stok' },
+          { name: 'skuColumn', label: 'Kolom SKU', type: 'text', placeholder: 'Contoh: sku' },
+          { name: 'stockColumn', label: 'Kolom Stok', type: 'text', placeholder: 'Contoh: stock' },
+        ]
+      }
+      if (k === 'price_list') {
+        return [
+          { name: 'currency', label: 'Mata Uang', type: 'select', options: ['IDR', 'USD'] },
+          { name: 'priceFile', label: 'Price List (file)', type: 'file' },
+        ]
+      }
+      if (k === 'shipping_faq') {
+        return [
+          { name: 'faqFile', label: 'FAQ Pengiriman (file)', type: 'file' },
+          { name: 'fallback', label: 'Jawaban fallback', type: 'textarea', placeholder: 'Jawaban default jika tidak ditemukan di FAQ' },
+        ]
+      }
+    }
+    return []
+  }
+
+  const openTemplateEdit = (cat, node) => {
+    const key = node?.key || node?.label
+    const label = node?.label || 'Node'
+    const schema = templateSchema(cat, key)
+    const cfgKey = `${cat}:${key}`
+    setTemplateFileName('')
+    setTemplateDraft(templateCfg[cfgKey] || {})
+    setTemplateEdit({ cat, key, label, schema })
+  }
+
+  const saveTemplateEdit = () => {
+    if (!templateEdit) return
+    const cfgKey = `${templateEdit.cat}:${templateEdit.key}`
+    const next = { ...templateCfg, [cfgKey]: { ...templateDraft, fileName: templateFileName || templateDraft.fileName || '' } }
+    setTemplateCfg(next)
+    try {
+      window.localStorage.setItem('templateNodeConfig:v1', JSON.stringify(next))
+    } catch {}
+    showToast(`Tersimpan: ${templateEdit.label}`, 'green')
+    setTemplateEdit(null)
   }
 
   return (
@@ -684,7 +783,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
                     })()}
                   </div>
                   <p className="text-[11px] text-gray-500 mt-0.5">
-                    {TYPE_LABELS[current.type]} · Trigger: {current.trigger} · Dibuat {current.created}
+                    {TYPE_LABELS[current.type]} · Dibuat {current.created}
                   </p>
                 </div>
               </div>
@@ -1104,28 +1203,13 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 mb-1.5 block">Trigger</label>
-                <select
-                  value={newTrigger}
-                  onChange={(e) => setNewTrigger(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500/30 appearance-none cursor-pointer"
-                >
-                  <option>Webhook (HTTP POST)</option>
-                  <option>Schedule (Cron Job)</option>
-                  <option>Event (Email Masuk)</option>
-                  <option>Manual (Tombol)</option>
-                  <option>File Upload (S3/GCS)</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 mb-2 block">Template Node</label>
                 {newCat === 'doc' ? (
-                  <DokumenTemplate />
+                  <DokumenTemplate mode="stack" onEdit={(n) => openTemplateEdit('doc', n)} />
                 ) : newCat === 'mkt' ? (
-                  <MarketingTemplate />
+                  <MarketingTemplate mode="stack" onEdit={(n) => openTemplateEdit('mkt', n)} />
                 ) : newCat === 'sup' ? (
-                  <SupportTemplate />
+                  <SupportTemplate mode="stack" onEdit={(n) => openTemplateEdit('sup', n)} />
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -1169,6 +1253,111 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {templateEdit ? (
+        <div className="fixed inset-0 z-[115] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setTemplateEdit(null)
+            }}
+          ></div>
+          <div className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto glass-strong rounded-2xl p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="font-oswald font-light text-xl">Edit Data Node</h2>
+                <p className="text-[10px] text-gray-500 mt-0.5">{templateEdit.label}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setTemplateEdit(null)
+                }}
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                aria-label="Tutup"
+              >
+                <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+              </button>
+            </div>
+
+            {templateEdit.schema.length ? (
+              <div className="space-y-3">
+                {templateEdit.schema.map((f) => (
+                  <div key={f.name}>
+                    <label className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 mb-1.5 block">{f.label}</label>
+                    {f.type === 'textarea' ? (
+                      <textarea
+                        value={templateDraft[f.name] || ''}
+                        onChange={(e) => setTemplateDraft((p) => ({ ...p, [f.name]: e.target.value }))}
+                        placeholder={f.placeholder || ''}
+                        rows={4}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/30 transition-all resize-none"
+                      />
+                    ) : f.type === 'select' ? (
+                      <select
+                        value={templateDraft[f.name] || (f.options?.[0] ?? '')}
+                        onChange={(e) => setTemplateDraft((p) => ({ ...p, [f.name]: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500/30 appearance-none cursor-pointer"
+                      >
+                        {(f.options || []).map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
+                    ) : f.type === 'file' ? (
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            setTemplateFileName(file?.name || '')
+                          }}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500/30 transition-all"
+                        />
+                        <div className="text-[10px] text-gray-500">
+                          {templateFileName || templateDraft.fileName ? `File: ${templateFileName || templateDraft.fileName}` : 'Belum ada file dipilih'}
+                        </div>
+                      </div>
+                    ) : (
+                      <input
+                        value={templateDraft[f.name] || ''}
+                        onChange={(e) => setTemplateDraft((p) => ({ ...p, [f.name]: e.target.value }))}
+                        type={f.type === 'url' ? 'url' : 'text'}
+                        placeholder={f.placeholder || ''}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/30 transition-all"
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTemplateEdit(null)
+                    }}
+                    className="flex-1 text-xs font-medium py-2.5 rounded-xl border border-white/10 text-gray-400 hover:bg-white/5 transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveTemplateEdit}
+                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs py-2.5 rounded-xl transition-all hover:shadow-[0_0_20px_rgba(245,158,11,.3)]"
+                  >
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">
+                Node ini tidak membutuhkan data acuan tambahan.
+              </div>
+            )}
           </div>
         </div>
       ) : null}
