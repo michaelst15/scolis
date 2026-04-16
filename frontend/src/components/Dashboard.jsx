@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Workflow, { INITIAL_WORKFLOWS, WORKFLOWS_STORAGE_KEY } from './Workflow.jsx'
+import Workflow, { INITIAL_WORKFLOWS, TEMPLATE_NODE_CONFIG_KEY, WORKFLOWS_STORAGE_KEY, storageKeyForUser } from './Workflow.jsx'
 import WorkflowDokumen from './WorkflowDokumen.jsx'
 import { getDokumenFlowPreset } from './dokumenFlowPresets.js'
 import { getMarketingFlowPreset } from './marketingFlowPresets.js'
@@ -120,7 +120,27 @@ function getDateLabel(d = new Date()) {
   return d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-export default function Dashboard({ onLogout }) {
+function initialsOf(name) {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+  if (!parts.length) return 'US'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+export default function Dashboard({ onLogout, currentUser }) {
+  const displayName = currentUser?.fullName?.trim?.() || 'User'
+  const firstName = displayName.split(/\s+/)[0] || 'User'
+  const roleLabel = currentUser?.role === 'ADMIN' ? 'Admin' : 'User'
+  const avatarInitials = initialsOf(displayName)
+  const storageUserId = currentUser?.id ?? currentUser?.email ?? 'anon'
+  const workflowsStorageKey = storageKeyForUser(WORKFLOWS_STORAGE_KEY, storageUserId)
+  const templateStorageKey = storageKeyForUser(TEMPLATE_NODE_CONFIG_KEY, storageUserId)
+  const integrationsStorageKey = storageKeyForUser('integrations:connected:v1', storageUserId)
+  const settingsStorageKey = storageKeyForUser('settings:prefs:v1', storageUserId)
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('overview')
   const [chartType, setChartType] = useState('all')
@@ -131,7 +151,7 @@ export default function Dashboard({ onLogout }) {
   const [dateLabel, setDateLabel] = useState(() => getDateLabel())
   const [workflows, setWorkflows] = useState(() => {
     try {
-      const raw = window.localStorage.getItem(WORKFLOWS_STORAGE_KEY)
+      const raw = window.localStorage.getItem(workflowsStorageKey)
       if (!raw) return INITIAL_WORKFLOWS
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) return parsed
@@ -175,9 +195,9 @@ export default function Dashboard({ onLogout }) {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(WORKFLOWS_STORAGE_KEY, JSON.stringify(workflows))
+      window.localStorage.setItem(workflowsStorageKey, JSON.stringify(workflows))
     } catch {}
-  }, [workflows])
+  }, [workflows, workflowsStorageKey])
 
   useEffect(() => {
     if (!mobileUserTipOpen) return
@@ -545,21 +565,21 @@ export default function Dashboard({ onLogout }) {
                   onClick={() => setMobileUserTipOpen((v) => !v)}
                   aria-label="Info pengguna"
                 >
-                  MT
+                  {avatarInitials}
                 </button>
                 {mobileUserTipOpen ? (
                   <div className="absolute z-[200] top-full right-0 mt-2 px-3 py-2 rounded-xl glass-strong text-white text-[11px] whitespace-nowrap shadow-[0_10px_35px_rgba(0,0,0,0.45)] pointer-events-none">
-                    Michael S Tobing
+                    {displayName}
                   </div>
                 ) : null}
               </div>
               <div className="hidden sm:flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold">
-                  MT
+                  {avatarInitials}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-medium">Michael S Tobing</p>
-                  <p className="text-[10px] text-gray-500">Admin</p>
+                  <p className="text-xs font-medium">{displayName}</p>
+                  <p className="text-[10px] text-gray-500">{roleLabel}</p>
                 </div>
               </div>
               <button
@@ -581,12 +601,12 @@ export default function Dashboard({ onLogout }) {
             }}
           >
             {activeNav === 'workflow' ? (
-              <Workflow workflows={workflows} setWorkflows={setWorkflows} />
+              <Workflow workflows={workflows} setWorkflows={setWorkflows} storageUserId={storageUserId} />
             ) : activeNav === 'overview' ? (
               <>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
               <div>
-                <h1 className="font-oswald font-light text-2xl tracking-tight">{greeting}, Michael</h1>
+                <h1 className="font-oswald font-light text-2xl tracking-tight">{greeting}, {firstName}</h1>
                 <p className="text-gray-500 text-xs mt-0.5">{dateLabel} — Berikut ringkasan operasional Anda hari ini.</p>
               </div>
             </div>
@@ -888,9 +908,15 @@ export default function Dashboard({ onLogout }) {
                 }}
               />
             ) : activeNav === 'integrations' ? (
-              <IntegrationsView />
+              <IntegrationsView storageKey={integrationsStorageKey} />
             ) : activeNav === 'settings' ? (
-              <SettingsView />
+              <SettingsView
+                currentUser={currentUser}
+                settingsStorageKey={settingsStorageKey}
+                templateStorageKey={templateStorageKey}
+                workflowsStorageKey={workflowsStorageKey}
+                integrationsStorageKey={integrationsStorageKey}
+              />
             ) : activeNav === 'dokumen' ? (
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 anim-up">
@@ -1475,12 +1501,12 @@ function ActivityLogView({ items, onClear }) {
   )
 }
 
-function IntegrationsView() {
+function IntegrationsView({ storageKey }) {
   const [tab, setTab] = useState('channels')
   const [query, setQuery] = useState('')
   const [connected, setConnected] = useState(() => {
     try {
-      const raw = window.localStorage.getItem('integrations:connected:v1')
+      const raw = window.localStorage.getItem(storageKey || 'integrations:connected:v1')
       if (!raw) return {}
       const parsed = JSON.parse(raw)
       if (parsed && typeof parsed === 'object') return parsed
@@ -1526,7 +1552,7 @@ function IntegrationsView() {
     setConnected((prev) => {
       const next = { ...prev, [id]: !prev[id] }
       try {
-        window.localStorage.setItem('integrations:connected:v1', JSON.stringify(next))
+        window.localStorage.setItem(storageKey || 'integrations:connected:v1', JSON.stringify(next))
       } catch {}
       return next
     })
@@ -1629,10 +1655,14 @@ function IntegrationsView() {
   )
 }
 
-function SettingsView() {
+function SettingsView({ currentUser, settingsStorageKey, templateStorageKey, workflowsStorageKey, integrationsStorageKey }) {
+  const displayName = currentUser?.fullName?.trim?.() || 'User'
+  const roleLabel = currentUser?.role === 'ADMIN' ? 'Admin' : 'User'
+  const avatarInitials = initialsOf(displayName)
+
   const [prefs, setPrefs] = useState(() => {
     try {
-      const raw = window.localStorage.getItem('settings:prefs:v1')
+      const raw = window.localStorage.getItem(settingsStorageKey || 'settings:prefs:v1')
       if (!raw) return null
       const parsed = JSON.parse(raw)
       if (parsed && typeof parsed === 'object') return parsed
@@ -1656,7 +1686,7 @@ function SettingsView() {
   const save = () => {
     const next = { companyName, timezone, theme, autoRun, emailReports, errorAlerts, retention }
     try {
-      window.localStorage.setItem('settings:prefs:v1', JSON.stringify(next))
+      window.localStorage.setItem(settingsStorageKey || 'settings:prefs:v1', JSON.stringify(next))
     } catch {}
     setSavedTip(true)
     window.setTimeout(() => setSavedTip(false), 2000)
@@ -1795,11 +1825,11 @@ function SettingsView() {
             </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-black text-xs font-bold">
-                MT
+                {avatarInitials}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-200 truncate">Michael S Tobing</p>
-                <p className="text-[10px] text-gray-500 truncate">Admin</p>
+                <p className="text-xs font-medium text-gray-200 truncate">{displayName}</p>
+                <p className="text-[10px] text-gray-500 truncate">{roleLabel}</p>
               </div>
             </div>
             <div className="mt-4 space-y-2">
@@ -1824,9 +1854,10 @@ function SettingsView() {
               type="button"
               onClick={() => {
                 try {
-                  window.localStorage.removeItem('templateNodeConfig:v1')
-                  window.localStorage.removeItem(WORKFLOWS_STORAGE_KEY)
-                  window.localStorage.removeItem('integrations:connected:v1')
+                  if (templateStorageKey) window.localStorage.removeItem(templateStorageKey)
+                  if (workflowsStorageKey) window.localStorage.removeItem(workflowsStorageKey)
+                  if (integrationsStorageKey) window.localStorage.removeItem(integrationsStorageKey)
+                  if (settingsStorageKey) window.localStorage.removeItem(settingsStorageKey)
                 } catch {}
                 setSavedTip(true)
                 window.setTimeout(() => setSavedTip(false), 2000)

@@ -120,6 +120,91 @@ body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hid
   transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
 }
 .toast.show{transform:translateY(0);opacity:1}
+.toast-ico{flex-shrink:0}
+.toast.tone-green{border-color:rgba(16,185,129,0.25);box-shadow:0 16px 45px rgba(0,0,0,0.45),0 0 35px rgba(16,185,129,0.18)}
+.toast.tone-green .toast-ico{color:#34D399}
+.toast.tone-amber{border-color:rgba(245,158,11,0.28);box-shadow:0 16px 45px rgba(0,0,0,0.45),0 0 35px rgba(245,158,11,0.20)}
+.toast.tone-amber .toast-ico{color:#FBBF24}
+.toast.tone-blue{border-color:rgba(59,130,246,0.28);box-shadow:0 16px 45px rgba(0,0,0,0.45),0 0 35px rgba(59,130,246,0.18)}
+.toast.tone-blue .toast-ico{color:#60A5FA}
+.toast.tone-red{border-color:rgba(239,68,68,0.28);box-shadow:0 16px 45px rgba(0,0,0,0.45),0 0 35px rgba(239,68,68,0.16)}
+.toast.tone-red .toast-ico{color:#FCA5A5}
+
+@keyframes toastPop{0%{transform:translateY(120%) scale(0.96);opacity:0}60%{transform:translateY(0) scale(1.02);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+@keyframes toastSweep{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@keyframes toastRing{0%{transform:scale(0.75);opacity:0}35%{opacity:0.35}100%{transform:scale(1.55);opacity:0}}
+@keyframes toastSpark{0%{transform:translateY(-50%) scale(0.55);opacity:0}22%{opacity:1}100%{transform:translateY(-50%) scale(1.7);opacity:0}}
+
+.toast.burst.show{animation:toastPop 0.45s cubic-bezier(0.2,0.9,0.2,1) both}
+.toast.kind-login::before,
+.toast.kind-register::before,
+.toast.kind-otp::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:14px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.14),transparent);
+  opacity:0;
+  pointer-events:none;
+}
+.toast.kind-login.burst::before,
+.toast.kind-register.burst::before,
+.toast.kind-otp.burst::before{
+  opacity:1;
+  animation:toastSweep 0.9s ease-out both;
+}
+.toast.kind-login::after{
+  content:'';
+  position:absolute;
+  left:18px;
+  top:50%;
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.14);
+  transform:translateY(-50%);
+  opacity:0;
+  pointer-events:none;
+}
+.toast.kind-login.burst::after{animation:toastRing 0.85s ease-out both}
+
+.toast.kind-register::after{
+  content:'';
+  position:absolute;
+  left:18px;
+  top:50%;
+  width:44px;
+  height:44px;
+  transform:translateY(-50%);
+  opacity:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(245,158,11,0.55), transparent 58%),
+    radial-gradient(circle at 70% 20%, rgba(251,191,36,0.45), transparent 58%),
+    radial-gradient(circle at 65% 75%, rgba(245,158,11,0.35), transparent 62%),
+    radial-gradient(circle at 25% 70%, rgba(252,211,77,0.38), transparent 62%);
+  filter:drop-shadow(0 0 10px rgba(245,158,11,0.22));
+}
+.toast.kind-register.burst::after{animation:toastSpark 0.9s ease-out both}
+
+.toast.kind-otp::after{
+  content:'';
+  position:absolute;
+  left:18px;
+  top:50%;
+  width:44px;
+  height:44px;
+  transform:translateY(-50%);
+  opacity:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(245,158,11,0.55), transparent 58%),
+    radial-gradient(circle at 75% 25%, rgba(251,191,36,0.45), transparent 58%),
+    radial-gradient(circle at 60% 80%, rgba(245,158,11,0.35), transparent 62%),
+    radial-gradient(circle at 25% 75%, rgba(252,211,77,0.38), transparent 62%);
+  filter:drop-shadow(0 0 12px rgba(245,158,11,0.28));
+}
+.toast.kind-otp.burst::after{animation:toastSpark 0.9s ease-out both}
 
 .mobile-menu{
   opacity:0;pointer-events:none;transition:opacity 0.25s ease;
@@ -128,3 +213,27 @@ body{font-family:'Inter',sans-serif;background:#0a0f26;color:#fff;overflow-x:hid
 
 .progress-bar{position:fixed;top:0;left:0;height:3px;z-index:9999;
   background:linear-gradient(to right,#F59E0B,#FBBF24);transition:width 0.1s}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill,
+input:-webkit-autofill:hover,
+textarea:-webkit-autofill:hover,
+select:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus{
+  -webkit-text-fill-color:#fff;
+  caret-color:#fff;
+  -webkit-box-shadow:0 0 0 1000px rgba(255,255,255,0.05) inset;
+  box-shadow:0 0 0 1000px rgba(255,255,255,0.05) inset;
+  transition:background-color 9999s ease-out 0s;
+}
+
+input:-moz-autofill,
+textarea:-moz-autofill,
+select:-moz-autofill{
+  box-shadow:0 0 0 1000px rgba(255,255,255,0.05) inset;
+  -moz-text-fill-color:#fff;
+  caret-color:#fff;
+}

@@ -12,16 +12,87 @@ const FOOTER_IMAGES = Object.entries(
 
 export default function App() {
   const toastTimeoutRef = useRef(null)
+  const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/+$/, '')
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
-  const [isAdminAuthed, setIsAdminAuthed] = useState(() => window.localStorage.getItem('adminAuthed') === '1')
+  const [authSession, setAuthSession] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem('authSession')
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (!parsed || !parsed.token || !parsed.user) return null
+      return parsed
+    } catch {
+      return null
+    }
+  })
+  const isAuthed = !!authSession?.token
+  const [checkingSession, setCheckingSession] = useState(() => !!authSession?.token)
 
   useEffect(() => {
-    if (isAdminAuthed) window.localStorage.setItem('adminAuthed', '1')
-    else window.localStorage.removeItem('adminAuthed')
-  }, [isAdminAuthed])
+    if (authSession?.token && authSession?.user) {
+      window.localStorage.setItem('authSession', JSON.stringify(authSession))
+      // Backward compatibility for legacy checks in existing UI.
+      window.localStorage.setItem('adminAuthed', '1')
+    } else {
+      window.localStorage.removeItem('authSession')
+      window.localStorage.removeItem('adminAuthed')
+    }
+  }, [authSession])
 
-  const logoutAndRefresh = () => {
+  useEffect(() => {
+    if (!authSession?.token) {
+      setCheckingSession(false)
+      return
+    }
+
+    let cancelled = false
+    let intervalId = null
+    const run = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/me`, {
+          headers: { Authorization: `Bearer ${authSession.token}` },
+        })
+        if (!res.ok) throw new Error('unauthorized')
+        const me = await res.json()
+        if (cancelled) return
+        setAuthSession((prev) => {
+          if (!prev?.token) return prev
+          return { ...prev, user: me }
+        })
+      } catch {
+        if (!cancelled) {
+          setAuthSession(null)
+          setAuthMode('login')
+        }
+      } finally {
+        if (!cancelled) setCheckingSession(false)
+      }
+    }
+
+    run()
+    intervalId = window.setInterval(run, 20_000)
+    return () => {
+      cancelled = true
+      if (intervalId) window.clearInterval(intervalId)
+    }
+  }, [API_BASE, authSession?.token])
+
+  const logoutAndRefresh = async () => {
+    try {
+      const raw = window.localStorage.getItem('authSession')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        const token = parsed?.token
+        if (token) {
+          await fetch(`${API_BASE}/api/auth/logout`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          }).catch(() => {})
+        }
+      }
+    } catch {}
+    window.localStorage.removeItem('authSession')
     window.localStorage.removeItem('adminAuthed')
     const url = window.location.origin + window.location.pathname + window.location.search
     window.location.assign(url)
@@ -43,6 +114,12 @@ export default function App() {
     menu.classList.toggle('open')
   }
 
+  const closeMobile = () => {
+    const menu = document.getElementById('mobileMenu')
+    if (!menu) return
+    menu.classList.remove('open')
+  }
+
   const switchTab = (tab) => {
     document.querySelectorAll('.tab-content').forEach((el) => el.classList.add('hidden'))
     document.querySelectorAll('.tab-btn').forEach((btn) => {
@@ -62,13 +139,26 @@ export default function App() {
     initIcons()
   }
 
-  const showToast = (msg) => {
+  const showToast = (msg, opts = {}) => {
     const toast = document.getElementById('toast')
     const msgEl = document.getElementById('toastMsg')
+    const iconEl = document.getElementById('toastIcon')
     if (!toast || !msgEl) return
+
+    const tone = opts?.tone || 'green'
+    const icon = opts?.icon || (tone === 'red' ? 'alert-triangle' : tone === 'blue' ? 'info' : 'check-circle')
+    const kind = opts?.kind || ''
+    ;['tone-green', 'tone-amber', 'tone-red', 'tone-blue', 'kind-login', 'kind-register'].forEach((c) => toast.classList.remove(c))
+    toast.classList.add(`tone-${tone}`)
+    if (kind) toast.classList.add(`kind-${kind}`)
+    if (iconEl) iconEl.setAttribute('data-lucide', icon)
 
     msgEl.textContent = msg
     toast.classList.add('show')
+    toast.classList.remove('burst')
+    void toast.offsetWidth
+    toast.classList.add('burst')
+    window.lucide?.createIcons?.()
 
     if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current)
     toastTimeoutRef.current = window.setTimeout(() => {
@@ -80,7 +170,7 @@ export default function App() {
   const handleSubmit = (e) => {
     e.preventDefault()
     const name = document.getElementById('nameInput')?.value ?? ''
-    showToast('Terima kasih, ' + name + '! Tim kami akan menghubungi Anda dalam 24 jam.')
+    showToast('Terima kasih, ' + name + '! Tim kami akan menghubungi Anda dalam 24 jam.', { tone: 'blue', icon: 'check-circle' })
     e.target.reset()
 
     const select = document.getElementById('solutionSelect')
@@ -88,6 +178,14 @@ export default function App() {
   }
 
   useEffect(() => {
+    // Defensive reset: avoid stuck full-screen overlay after HMR/reload.
+    closeMobile()
+    document.body.style.overflow = ''
+
+    const onResizeCloseMobile = () => {
+      if (window.innerWidth >= 768) closeMobile()
+    }
+
     initIcons()
 
     const onScroll = () => {
@@ -152,9 +250,11 @@ export default function App() {
       solutionSelect.style.color = '#fff'
     }
     if (solutionSelect) solutionSelect.addEventListener('change', onSelectChange)
+    window.addEventListener('resize', onResizeCloseMobile)
 
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResizeCloseMobile)
       revealObserver.disconnect()
       counterObserver.disconnect()
 
@@ -165,14 +265,22 @@ export default function App() {
     }
   }, [])
 
-  if (isAdminAuthed) return <Dashboard onLogout={logoutAndRefresh} />
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-[#0a0f26] text-white flex items-center justify-center">
+        <div className="glass-strong rounded-2xl px-6 py-4 text-sm text-gray-300">Memverifikasi sesi login...</div>
+      </div>
+    )
+  }
+
+  if (isAuthed) return <Dashboard onLogout={logoutAndRefresh} currentUser={authSession?.user || null} />
 
   return (
     <>
 
 <div className="progress-bar" id="progressBar" style={{ width: '0%' }}></div>
-<div className="toast glass-strong rounded-xl px-6 py-4 flex items-center gap-3" id="toast">
-    <i data-lucide="check-circle" className="w-5 h-5 text-green-400"></i>
+<div className="toast glass-strong rounded-xl px-6 py-4 flex items-center gap-3 tone-green" id="toast">
+    <i id="toastIcon" data-lucide="check-circle" className="w-5 h-5 toast-ico"></i>
     <span className="text-sm font-medium" id="toastMsg">Pesan terkirim!</span>
 </div>
 <AuthModal
@@ -181,7 +289,9 @@ export default function App() {
   onModeChange={setAuthMode}
   onClose={() => setAuthOpen(false)}
   onToast={showToast}
-  onLoginSuccess={() => setIsAdminAuthed(true)}
+  onLoginSuccess={(session) => {
+    setAuthSession(session)
+  }}
 />
 <nav className="fixed top-3 sm:top-4 inset-x-0 z-50 animate-blur-in px-4 sm:px-6">
     <div className="mx-auto w-[92%] max-w-[520px] md:w-full md:max-w-6xl glass-strong rounded-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3 min-w-0">
@@ -203,16 +313,13 @@ export default function App() {
         <div className="hidden md:flex items-center gap-3 justify-self-end">
             <button
               type="button"
-              className="text-[13px] font-medium text-gray-300 hover:text-white px-4 py-2 transition-colors"
+              className="bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold px-5 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
               onClick={() => {
                 setAuthMode('login')
                 setAuthOpen(true)
               }}
             >
               Masuk
-            </button>
-            <button className="bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold px-5 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]">
-                Mulai Gratis
             </button>
         </div>
         <button type="button" className="md:hidden text-white justify-self-end" onClick={toggleMobile} aria-label="Buka menu">
@@ -239,7 +346,7 @@ export default function App() {
         <div className="flex flex-col items-center gap-3 mt-2 w-full">
             <button
               type="button"
-              className="w-full text-gray-300 hover:text-white px-8 py-3 rounded-full text-lg transition-colors"
+              className="w-full bg-amber-500 text-black font-semibold px-8 py-3 rounded-full text-lg"
               onClick={() => {
                 toggleMobile()
                 setAuthMode('login')
@@ -248,7 +355,6 @@ export default function App() {
             >
               Masuk
             </button>
-            <button className="w-full bg-amber-500 text-black font-semibold px-8 py-3 rounded-full text-lg">Mulai Gratis</button>
         </div>
     </div>
 </div>

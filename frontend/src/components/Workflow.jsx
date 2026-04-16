@@ -136,6 +136,12 @@ const NODE_ICONS = {
 }
 
 export const WORKFLOWS_STORAGE_KEY = 'mybing.workflows'
+export const TEMPLATE_NODE_CONFIG_KEY = 'templateNodeConfig:v1'
+
+export function storageKeyForUser(baseKey, userId) {
+  const u = userId == null || userId === '' ? 'anon' : String(userId)
+  return `${baseKey}:${u}`
+}
 
 export const INITIAL_WORKFLOWS = [
   {
@@ -383,10 +389,13 @@ function ToastStack({ toasts, onDismiss }) {
   )
 }
 
-export default function Workflow({ workflows: workflowsProp, setWorkflows: setWorkflowsProp }) {
+export default function Workflow({ workflows: workflowsProp, setWorkflows: setWorkflowsProp, storageUserId }) {
+  const workflowsStorageKey = storageKeyForUser(WORKFLOWS_STORAGE_KEY, storageUserId)
+  const templateStorageKey = storageKeyForUser(TEMPLATE_NODE_CONFIG_KEY, storageUserId)
+
   const [internalWorkflows, setInternalWorkflows] = useState(() => {
     try {
-      const raw = window.localStorage.getItem(WORKFLOWS_STORAGE_KEY)
+      const raw = window.localStorage.getItem(workflowsStorageKey)
       if (!raw) return INITIAL_WORKFLOWS
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) return parsed
@@ -411,7 +420,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
   const [templateFileName, setTemplateFileName] = useState('')
   const [templateCfg, setTemplateCfg] = useState(() => {
     try {
-      const raw = window.localStorage.getItem('templateNodeConfig:v1')
+      const raw = window.localStorage.getItem(templateStorageKey)
       if (!raw) return {}
       const parsed = JSON.parse(raw)
       if (parsed && typeof parsed === 'object') return parsed
@@ -446,10 +455,11 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
   }, [safeView, filter, sort, query, detailId, createOpen, importOpen, templateEdit])
 
   useEffect(() => {
+    if (workflowsProp) return
     try {
-      window.localStorage.setItem(WORKFLOWS_STORAGE_KEY, JSON.stringify(workflows))
+      window.localStorage.setItem(workflowsStorageKey, JSON.stringify(workflows))
     } catch {}
-  }, [workflows])
+  }, [workflows, workflowsProp, workflowsStorageKey])
 
   useEffect(() => {
     if (!createOpen) return
@@ -614,7 +624,7 @@ export default function Workflow({ workflows: workflowsProp, setWorkflows: setWo
     const next = { ...templateCfg, [cfgKey]: { ...templateDraft, fileName: templateFileName || templateDraft.fileName || '' } }
     setTemplateCfg(next)
     try {
-      window.localStorage.setItem('templateNodeConfig:v1', JSON.stringify(next))
+      window.localStorage.setItem(templateStorageKey, JSON.stringify(next))
     } catch {}
     showToast(`Tersimpan: ${templateEdit.label}`, 'green')
     setTemplateEdit(null)
